@@ -1,0 +1,60 @@
+/* DevOps Dark Theme Override */
+:root {
+  --devops-bg: #0B0F17;
+  --devops-dialog: #1a3a71;
+  --devops-panel: #111827;
+  --devops-panel-light: #1a2332;
+  --devops-border: #1f2937;
+  --devops-cyan: #38BDF8;
+  --devops-cyan-glow: rgba(56, 189, 248, 0.3);
+  --devops-green: #10B981;
+  --devops-amber: #F59E0B;
+  --devops-red: #EF4444;
+  --devops-text: #E5E7EB;
+  --devops-text-muted: #9CA3AF;
+}
+
+body {
+  background: var(--devops-bg);
+  color: var(--devops-text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.glass-panel {
+  background: rgba(17, 24, 39, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(56, 189, 248, 0.1);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+.glass-panel:hover {
+  border-color: rgba(56, 189, 248, 0.3);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
+}
+
+.mono {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+}
+
+.cyan-glow {
+  box-shadow: 0 0 20px var(--devops-cyan-glow);
+}
+
+.stat-card {
+  background: var(--devops-panel);
+  border: 1px solid var(--devops-border);
+  transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+  border-color: var(--devops-cyan);
+  transform: translateY(-2px);
+}
+
+.dialog {
+  background: var(--devops-dialog);
+}
+
+.dialog-text {
+  color: var(--devops-text);
+}
