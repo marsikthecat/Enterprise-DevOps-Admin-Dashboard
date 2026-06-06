@@ -1,21 +1,7 @@
 import { Network as NetworkIcon, Activity, Globe, Wifi } from "lucide-react";
+import { useState, useEffect } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
-
-const networkData = [
-  { time: "00:00", in: 120, out: 80 },
-  { time: "02:00", in: 95, out: 65 },
-  { time: "04:00", in: 110, out: 75 },
-  { time: "06:00", in: 180, out: 120 },
-  { time: "08:00", in: 280, out: 190 },
-  { time: "10:00", in: 320, out: 220 },
-  { time: "12:00", in: 350, out: 240 },
-  { time: "14:00", in: 380, out: 270 },
-  { time: "16:00", in: 420, out: 310 },
-  { time: "18:00", in: 390, out: 280 },
-  { time: "20:00", in: 290, out: 210 },
-  { time: "22:00", in: 200, out: 140 },
-  { time: "23:59", in: 150, out: 95 },
-];
+import { useNetworkStore } from "../../states/networkTrafficState";
 
 const topologyNodes = [
   { id: "internet", label: "Internet", type: "external", x: 50, y: 10 },
@@ -30,6 +16,19 @@ const topologyNodes = [
 ];
 
 export function Network() {
+
+  const [Throughput, setThroughput] = useState<number>(280);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+    const newThroughput = Math.floor(Math.random() * 10) - 5;
+    const temp = Throughput;
+    setThroughput(temp + newThroughput);
+    }, 500);
+    return () => clearInterval(interval);
+    }, []);
+    const networkData = useNetworkStore(s => s.networkData);
+    const throughtPut = useNetworkStore(s => s.networkThroughput);
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -43,7 +42,7 @@ export function Network() {
           <div className="w-10 h-10 rounded-lg bg-[#38BDF8]/10 flex items-center justify-center mb-3">
             <Activity className="w-5 h-5 text-[#38BDF8]" />
           </div>
-          <div className="mono text-3xl font-semibold text-white mb-1">420 Mb/s</div>
+          <div className="mono text-3xl font-semibold text-white mb-1" >{throughtPut.toFixed(1)} Mb/s</div>
           <div className="text-sm text-[#9CA3AF]">Current Throughput</div>
         </div>
 
@@ -73,10 +72,30 @@ export function Network() {
       </div>
 
       {/* Traffic Chart */}
-      <div className="glass-panel rounded-lg p-5">
-        <h3 className="text-lg font-semibold text-white mb-1">Network Traffic</h3>
-        <p className="text-sm text-[#9CA3AF] mb-4">Inbound / Outbound (GB/h)</p>
-        <ResponsiveContainer width="100%" height={300}>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="glass-panel rounded-lg p-5">
+          <h3 className="text-lg font-semibold text-white mb-1">Network Traffic</h3>
+          <p className="text-sm text-[#9CA3AF] mb-4">Inbound (GB/h)</p>
+          <ResponsiveContainer height={300}>
+            <LineChart data={networkData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+            <XAxis dataKey="time" stroke="#9CA3AF" style={{ fontSize: 12 }} />
+            <YAxis stroke="#9CA3AF" style={{ fontSize: 12 }} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#111827",
+                border: "1px solid #38BDF8",
+                borderRadius: "8px",
+              }}
+            />
+            <Line type="monotone" dataKey="in" stroke="#38BDF8" strokeWidth={2} dot={false} name="Inbound" />
+          </LineChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="glass-panel rounded-lg p-5">
+          <h3 className="text-lg font-semibold text-white mb-1">Network Traffic</h3>
+          <p className="text-sm text-[#9CA3AF] mb-4">Outbound (GB/h)</p> 
+          <ResponsiveContainer height={300}>
           <LineChart data={networkData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
             <XAxis dataKey="time" stroke="#9CA3AF" style={{ fontSize: 12 }} />
@@ -88,10 +107,10 @@ export function Network() {
                 borderRadius: "8px",
               }}
             />
-            <Line type="monotone" dataKey="in" stroke="#38BDF8" strokeWidth={2} dot={false} name="Inbound" />
             <Line type="monotone" dataKey="out" stroke="#10B981" strokeWidth={2} dot={false} name="Outbound" />
           </LineChart>
         </ResponsiveContainer>
+        </div>
       </div>
 
       {/* Network Topology */}

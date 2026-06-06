@@ -1,25 +1,27 @@
 import { useState } from "react";
 import { X, Server, Cpu, HardDrive, MapPin } from "lucide-react";
+import { ServerInfo } from "../pages/Servers";
 
 interface DeployServerDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  onDeploy: (serverData: Partial<ServerInfo>) => void;
 }
 
-export function DeployServerDialog({ isOpen, onClose }: DeployServerDialogProps) {
+export function DeployServerDialog({ isOpen, onClose, onDeploy }: DeployServerDialogProps) {
   const [serverConfig, setServerConfig] = useState({
-    name: "",
+    id: "",
     type: "web",
-    cpu: "4",
-    memory: "8",
-    storage: "100",
+    cpu: 4,
+    memory: 8,
+    storage: 100,
     region: "us-east-1a",
   });
 
   if (!isOpen) return null;
 
   const handleDeploy = () => {
-    console.log("Deploying server:", serverConfig);
+    onDeploy(serverConfig);
     onClose();
   };
 
@@ -53,8 +55,8 @@ export function DeployServerDialog({ isOpen, onClose }: DeployServerDialogProps)
               <label className="block text-sm font-semibold text-white mb-2">Server Name</label>
               <input
                 type="text"
-                value={serverConfig.name}
-                onChange={(e) => setServerConfig({ ...serverConfig, name: e.target.value })}
+                value={serverConfig.id}
+                onChange={(e) => setServerConfig({ ...serverConfig, id: e.target.value })}
               placeholder="srv-web-01"
               className="w-full px-4 py-2.5 bg-[#0B0F17] border border-[#1f2937] rounded-lg text-white placeholder-[#9CA3AF] focus:border-[#38BDF8] focus:outline-none transition-colors mono"
             />
@@ -114,7 +116,7 @@ export function DeployServerDialog({ isOpen, onClose }: DeployServerDialogProps)
               </label>
               <select
                 value={serverConfig.cpu}
-                onChange={(e) => setServerConfig({ ...serverConfig, cpu: e.target.value })}
+                onChange={(e) => setServerConfig({ ...serverConfig, cpu: parseInt(e.target.value) })}
                 className="w-full px-4 py-2.5 bg-[#0B0F17] border border-[#1f2937] rounded-lg text-white focus:border-[#38BDF8] focus:outline-none transition-colors mono"
               >
                 <option value="2">2 Cores</option>
@@ -132,7 +134,7 @@ export function DeployServerDialog({ isOpen, onClose }: DeployServerDialogProps)
               </label>
               <select
                 value={serverConfig.memory}
-                onChange={(e) => setServerConfig({ ...serverConfig, memory: e.target.value })}
+                onChange={(e) => setServerConfig({ ...serverConfig, memory: parseInt(e.target.value) })}
                 className="w-full px-4 py-2.5 bg-[#0B0F17] border border-[#1f2937] rounded-lg text-white focus:border-[#38BDF8] focus:outline-none transition-colors mono"
               >
                 <option value="4">4 GB</option>
@@ -150,7 +152,7 @@ export function DeployServerDialog({ isOpen, onClose }: DeployServerDialogProps)
               </label>
               <select
                 value={serverConfig.storage}
-                onChange={(e) => setServerConfig({ ...serverConfig, storage: e.target.value })}
+                onChange={(e) => setServerConfig({ ...serverConfig, storage: parseInt(e.target.value) })}
                 className="w-full px-4 py-2.5 bg-[#0B0F17] border border-[#1f2937] rounded-lg text-white focus:border-[#38BDF8] focus:outline-none transition-colors mono"
               >
                 <option value="50">50 GB</option>

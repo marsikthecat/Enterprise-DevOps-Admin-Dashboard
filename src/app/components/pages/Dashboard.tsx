@@ -10,28 +10,41 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-
-const cpuData = [
-  { time: "00:00", value: 45 },
-  { time: "04:00", value: 52 },
-  { time: "08:00", value: 78 },
-  { time: "12:00", value: 65 },
-  { time: "16:00", value: 88 },
-  { time: "20:00", value: 72 },
-  { time: "23:59", value: 58 },
-];
-
-const trafficData = [
-  { time: "00:00", in: 120, out: 80 },
-  { time: "04:00", in: 95, out: 65 },
-  { time: "08:00", in: 280, out: 190 },
-  { time: "12:00", in: 350, out: 240 },
-  { time: "16:00", in: 420, out: 310 },
-  { time: "20:00", in: 290, out: 210 },
-  { time: "23:59", in: 150, out: 95 },
-];
+import { useState, useEffect} from "react";
+import { useNetworkStore } from "../../states/networkTrafficState";
 
 export function Dashboard() {
+  const [cpuData, setCpuData] = useState(() => {
+  const now = Date.now();
+
+  return Array.from({ length: 30 }, (_, i) => ({
+    time: new Date(now - (29 - i) * 1000).toLocaleTimeString(),
+    value: Math.floor(Math.random() * 50),
+  }));
+});
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    setCpuData(prev => {
+      const lastValue = prev[prev.length - 1].value;
+
+      const fluctuation = Math.random() > 0.5 ? Math.floor(Math.random() * 10) + 1
+          : Math.floor(Math.random() * 1) - 10;
+
+      const newValue = Math.max(0, lastValue + fluctuation);
+      return [
+        ...prev.slice(1),
+        {
+          time: new Date().toLocaleTimeString(),
+          value: newValue,
+        },
+      ];
+    });
+  }, 1000);
+  return () => clearInterval(interval);
+}, []);
+
+const networkData = useNetworkStore(s => s.networkData);
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -101,7 +114,7 @@ export function Dashboard() {
       <div className="grid grid-cols-2 gap-4">
         <div className="glass-panel rounded-lg p-5">
           <h3 className="text-lg font-semibold text-white mb-1">Global CPU Usage</h3>
-          <p className="text-sm text-[#9CA3AF] mb-4">Average across all servers</p>
+          <p className="text-sm text-[#9CA3AF] mb-4">Average across all servers (%)</p>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={cpuData}>
               <defs>
@@ -135,7 +148,7 @@ export function Dashboard() {
           <h3 className="text-lg font-semibold text-white mb-1">Network Traffic</h3>
           <p className="text-sm text-[#9CA3AF] mb-4">Inbound / Outbound (GB/h)</p>
           <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={trafficData}>
+            <LineChart data={networkData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
               <XAxis dataKey="time" stroke="#9CA3AF" style={{ fontSize: 12 }} />
               <YAxis stroke="#9CA3AF" style={{ fontSize: 12 }} />

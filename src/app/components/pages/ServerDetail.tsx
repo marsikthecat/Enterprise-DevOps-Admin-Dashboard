@@ -1,16 +1,10 @@
 import { useParams, Link } from "react-router";
-import { ArrowLeft, Server, Play, Square, RefreshCw, Terminal, Package, Power } from "lucide-react";
+import { ArrowLeft, Server, Play, Square, RefreshCw, Terminal, Package, Power, XCircle } from "lucide-react";
 import { ConfirmDialog } from "../dialogs/ConfirmDialog";
 import { ErrorDialog } from "../dialogs/ErrorDialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DeployContainerDialog } from "../dialogs/DeployContainerDialog";
-
-const containerData = [
-  { id: "cnt-web-01", name: "nginx:latest", status: "running", ports: "80:80, 443:443", cpu: 8, mem: 124 },
-  { id: "cnt-api-01", name: "node:18-alpine", status: "running", ports: "3000:3000", cpu: 22, mem: 512 },
-  { id: "cnt-worker-01", name: "python:3.11", status: "running", ports: "-", cpu: 15, mem: 256 },
-  { id: "cnt-monitoring", name: "prometheus:latest", status: "running", ports: "9090:9090", cpu: 5, mem: 180 },
-];
+import { Process } from "./Processes";
 
 const pipelines = [
   {
@@ -36,13 +30,14 @@ const pipelines = [
   },
 ];
 
-const processes = [
-  { pid: 1247, name: "nginx", user: "www-data", cpu: 8.2, mem: 124, threads: 4, status: "S" },
-  { pid: 1892, name: "node", user: "nodeapp", cpu: 22.1, mem: 512, threads: 8, status: "R" },
-  { pid: 2103, name: "postgres", user: "postgres", cpu: 45.8, mem: 4200, threads: 16, status: "S" },
-  { pid: 2456, name: "redis-server", user: "redis", cpu: 3.2, mem: 180, threads: 2, status: "S" },
-  { pid: 3012, name: "python3", user: "worker", cpu: 15.4, mem: 256, threads: 6, status: "S" },
-];
+interface ContainerInfo {
+  id: string;
+  name: string;
+  status: string;
+  ports: string;
+  cpu: number;
+  mem: number;
+}
 
 export function ServerDetail() {
   const { id } = useParams();
@@ -50,6 +45,89 @@ export function ServerDetail() {
   const [open, setOpen] = useState(false);
   const [errorOpen, setErrorOpen] = useState(false);
   const [isDeployContainerDialogOpen, setIsDeployContainerDialogOpen] = useState(false);
+  const [containerList, setContainerList] = useState<ContainerInfo[]>([]);
+  const [processList, setProcessList] = useState<Process[]>([]);
+
+  const [containerAction, setContainerAction] = useState<{
+    action: "stop" | "restart" | "kill";
+    containerName: string;
+  } | null>(null);
+
+  const handleContainerAction = (action: "stop" | "restart" | "kill", containerName: string) => {
+    setContainerAction({ action, containerName });
+  };
+
+  const handleConfirmAction = () => {
+    console.log(`${containerAction?.action} container:`, containerAction?.containerName);
+    setContainerAction(null);
+  };
+
+  const getActionConfig = () => {
+    if (!containerAction) return { title: "", message: "", variant: "warning" as const };
+    const configs = {
+      stop: {
+        title: "Stop Container",
+        message: `Are you sure you want to stop ${containerAction.containerName}? The container will be gracefully stopped and can be restarted later.`,
+        variant: "warning" as const,
+      },
+      restart: {
+        title: "Restart Container",
+        message: `Are you sure you want to restart ${containerAction.containerName}? This will cause a brief interruption of service.`,
+        variant: "warning" as const,
+      },
+      kill: {
+        title: "Kill Container",
+        message: `Are you sure you want to forcefully kill ${containerAction.containerName}? This is a destructive action that immediately terminates the container without cleanup. Use this only if the container is unresponsive.`,
+        variant: "danger" as const,
+      },
+    };
+
+    return configs[containerAction.action];
+  };
+
+  const fetchContainer = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/servers/${id}/containers`);
+      const containers = await response.json();
+      setContainerList(containers); 
+    } catch (error) {
+      console.error("Failed to fetch containers", error);
+    }
+  }
+  const fetchProcesses = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/servers/${id}/processes`);
+      const processes = await response.json();
+      setProcessList(processes);
+    } catch (error) {
+      console.error("Failed to fetch processes", error);
+    }
+  }
+
+  useEffect(() => {
+    fetchContainer();
+    fetchProcesses();
+  }, [])
+
+  const deployContainer = async (containerData: Partial<ContainerInfo>) => {
+    try {
+      const response = await fetch(`http://localhost:3000/servers/${id}/containers`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(containerData),
+      });
+      if (response.ok) {
+        const newContainer = await response.json();
+        setContainerList((prev) => [...prev, newContainer]); 
+      } else {
+        console.error("Failed to deploy container");
+      }
+    } catch (error) {
+      console.error("Error deploying container:", error);
+    }
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -104,7 +182,7 @@ export function ServerDetail() {
           </button>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {containerData.map((container) => (
+          {containerList.map((container) => (
             <div
               key={container.id}
               className="bg-[#0B0F17] border border-[#1f2937] rounded-lg p-4 hover:border-[#38BDF8]/30 transition-all"
@@ -133,14 +211,27 @@ export function ServerDetail() {
                   <span className="mono text-[#38BDF8]">{container.mem} MB</span>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <button className="flex-1 py-1.5 bg-[#1f2937] hover:bg-[#1a2332] rounded text-xs text-white transition-colors flex items-center justify-center gap-1">
+              <div className="grid grid-cols-3 gap-1">
+                <button
+                  onClick={() => handleContainerAction("stop", container.id)}
+                  className="py-1.5 bg-[#1f2937] hover:bg-[#1a2332] rounded text-xs text-white transition-colors flex items-center justify-center gap-1"
+                >
                   <Square className="w-3 h-3" />
                   Stop
                 </button>
-                <button className="flex-1 py-1.5 bg-[#1f2937] hover:bg-[#1a2332] rounded text-xs text-white transition-colors flex items-center justify-center gap-1">
+                <button
+                  onClick={() => handleContainerAction("restart", container.id)}
+                  className="py-1.5 bg-[#1f2937] hover:bg-[#1a2332] rounded text-xs text-white transition-colors flex items-center justify-center gap-1"
+                >
                   <RefreshCw className="w-3 h-3" />
                   Restart
+                </button>
+                <button
+                  onClick={() => handleContainerAction("kill", container.id)}
+                  className="py-1.5 bg-[#EF4444]/10 hover:bg-[#EF4444]/20 border border-[#EF4444]/30 rounded text-xs text-[#EF4444] transition-colors flex items-center justify-center gap-1"
+                >
+                  <XCircle className="w-3 h-3" />
+                  Kill
                 </button>
               </div>
             </div>
@@ -202,52 +293,19 @@ export function ServerDetail() {
               </tr>
             </thead>
             <tbody>
-              {processes.map((process) => (
+              {processList.map((process) => (
                 <tr key={process.pid} className="border-b border-[#1f2937]/50 hover:bg-[#1a2332] transition-colors">
                   <td className="py-3 px-4 mono text-sm text-[#38BDF8]">{process.pid}</td>
                   <td className="py-3 px-4 mono text-sm text-white">{process.name}</td>
                   <td className="py-3 px-4 text-sm text-[#9CA3AF]">{process.user}</td>
                   <td className="py-3 px-4 mono text-sm text-white">{process.cpu}</td>
-                  <td className="py-3 px-4 mono text-sm text-[#9CA3AF]">{process.mem.toLocaleString()}</td>
+                  <td className="py-3 px-4 mono text-sm text-[#9CA3AF]">{process.memory}</td>
                   <td className="py-3 px-4 mono text-sm text-[#9CA3AF]">{process.threads}</td>
                   <td className="py-3 px-4 mono text-sm text-[#10B981]">{process.status}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* Network & Ports */}
-      <div className="glass-panel rounded-lg p-5">
-        <h3 className="text-lg font-semibold text-white mb-4">Network Configuration</h3>
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <h4 className="text-sm font-semibold text-[#9CA3AF] mb-3">LISTENING PORTS</h4>
-            <div className="space-y-2">
-              {["80 - HTTP", "443 - HTTPS", "3000 - Node API", "5432 - PostgreSQL", "6379 - Redis"].map(
-                (port, i) => (
-                  <div key={i} className="flex items-center justify-between p-2 bg-[#0B0F17] rounded">
-                    <span className="mono text-sm text-white">{port}</span>
-                    <div className="w-2 h-2 rounded-full bg-[#10B981]"></div>
-                  </div>
-                )
-              )}
-            </div>
-          </div>
-          <div>
-            <h4 className="text-sm font-semibold text-[#9CA3AF] mb-3">NETWORK INTERFACES</h4>
-            <div className="space-y-2">
-              <div className="p-3 bg-[#0B0F17] rounded">
-                <div className="text-sm text-white mb-1">eth0</div>
-                <div className="mono text-xs text-[#38BDF8]">10.0.2.10/24</div>
-              </div>
-              <div className="p-3 bg-[#0B0F17] rounded">
-                <div className="text-sm text-white mb-1">lo</div>
-                <div className="mono text-xs text-[#38BDF8]">127.0.0.1/8</div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     <ConfirmDialog
@@ -268,6 +326,15 @@ export function ServerDetail() {
     <DeployContainerDialog
       isOpen={isDeployContainerDialogOpen}
       onClose={() => setIsDeployContainerDialogOpen(false)}
+      onDeploy={deployContainer}
+    />
+
+    <ConfirmDialog
+      isOpen={containerAction !== null}
+      onClose={() => setContainerAction(null)}
+      onConfirm={handleConfirmAction}
+      {...getActionConfig()}
+      confirmText={containerAction?.action === "kill" ? "Force Kill" : "Confirm"}
     />
     </div>
   );

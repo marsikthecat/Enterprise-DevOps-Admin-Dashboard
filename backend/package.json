@@ -1,0 +1,24 @@
+{
+  "name": "task-api",
+  "version": "1.0.0",
+  "description": "Minimal task management API with Express and Prisma",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node src/index.js",
+    "migrate": "npx prisma migrate dev",
+    "seed": "node prisma/seed.js",
+    "studio": "npx prisma studio"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^5.11.0",
+    "cors": "^2.8.6",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "prisma": "^5.11.0"
+  }
+}

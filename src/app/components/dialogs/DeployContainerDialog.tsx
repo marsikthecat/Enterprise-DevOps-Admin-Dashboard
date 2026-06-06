@@ -4,6 +4,7 @@ import { X, Package, Check } from "lucide-react";
 interface DeployContainerDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  onDeploy: (containerData: Partial<{ name: string; ports: string; env: string }>) => void;
 }
 
 const containerImages = [
@@ -16,7 +17,7 @@ const containerImages = [
   { id: "prometheus", name: "prometheus:latest", description: "Discover the fire" },
 ];
 
-export function DeployContainerDialog({ isOpen, onClose }: DeployContainerDialogProps) {
+export function DeployContainerDialog({ isOpen, onClose, onDeploy }: DeployContainerDialogProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [imagePhotos, setImagePhotos] = useState<Record<string, string>>({});
   const [containerConfig, setContainerConfig] = useState({
@@ -44,7 +45,7 @@ export function DeployContainerDialog({ isOpen, onClose }: DeployContainerDialog
   if (!isOpen) return null;
 
   const handleDeploy = () => {
-    console.log("Deploying container:", { selectedImage, ...containerConfig });
+    onDeploy({name: containerConfig.name, ports: containerConfig.ports, env: containerConfig.env});
     onClose();
   };
 

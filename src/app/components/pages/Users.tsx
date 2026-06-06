@@ -1,69 +1,12 @@
 import { Users as UsersIcon, UserPlus, Shield, Key, Edit, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RotateAPIKeysDialog } from "../dialogs/RotateApiKeysDialog";
+import { AddUserDialog } from "../dialogs/AddUserDialog";
+import { ConfirmDialog } from "../dialogs/ConfirmDialog";
+import { EditUserDialog } from "../dialogs/EditUserDialog";
+import { SuccessDialog } from "../dialogs/SuccessDialog";
+import { RoleManagementDialog } from "../dialogs/RoleManagementDialog";
 
-const users = [
-  {
-    id: 1,
-    name: "Alice Johnson",
-    email: "alice@ops.dev",
-    role: "Admin",
-    status: "active",
-    lastLogin: "2 min ago",
-    sessions: 2,
-    avatar: "AJ",
-  },
-  {
-    id: 2,
-    name: "Bob Smith",
-    email: "bob@ops.dev",
-    role: "DevOps Engineer",
-    status: "active",
-    lastLogin: "1 hour ago",
-    sessions: 1,
-    avatar: "BS",
-  },
-  {
-    id: 3,
-    name: "Carol White",
-    email: "carol@ops.dev",
-    role: "Developer",
-    status: "active",
-    lastLogin: "3 hours ago",
-    sessions: 3,
-    avatar: "CW",
-  },
-  {
-    id: 4,
-    name: "David Lee",
-    email: "david@ops.dev",
-    role: "Security",
-    status: "active",
-    lastLogin: "5 min ago",
-    sessions: 1,
-    avatar: "DL",
-  },
-  {
-    id: 5,
-    name: "Emma Davis",
-    email: "emma@ops.dev",
-    role: "Developer",
-    status: "inactive",
-    lastLogin: "2 days ago",
-    sessions: 0,
-    avatar: "ED",
-  },
-  {
-    id: 6,
-    name: "Frank Miller",
-    email: "frank@ops.dev",
-    role: "DevOps Engineer",
-    status: "active",
-    lastLogin: "30 min ago",
-    sessions: 1,
-    avatar: "FM",
-  },
-];
 
 const roleColors = {
   Admin: "bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/30",
@@ -72,9 +15,97 @@ const roleColors = {
   Security: "bg-[#F59E0B]/10 text-[#F59E0B] border-[#F59E0B]/30",
 };
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  status: string;
+  lastLogin: string;
+  sessions: number;
+  avatar: string;
+}
+
 export function Users() {
-  
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isRotateKeysDialogOpen, setIsRotateKeysDialogOpen] = useState(false);
+
+   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<number | null>(null);
+  const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
+  const [editUserDialogOpen, setEditUserDialogOpen] = useState(false);
+  const [userToEdit, setUserToEdit] = useState<typeof users[0] | null>(null);
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [invitedEmail, setInvitedEmail] = useState("");
+  const [roleManagementOpen, setRoleManagementOpen] = useState(false);
+
+  const handleDeleteClick = (userId: number) => {
+    setUserToDelete(userId);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    console.log("Deleting user:", userToDelete);
+    setUserToDelete(null);
+  };
+
+  const handleEditClick = (user: typeof users[0]) => {
+    setUserToEdit(user);
+    setEditUserDialogOpen(true);
+  };
+
+  const handleAddUserSuccess = (email: string) => {
+    setInvitedEmail(email);
+    setSuccessDialogOpen(true);
+  };
+
+  const handleEditUserSave = (userData: any) => {
+    console.log("Saving user:", userData);
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/users");
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      await fetch(`http://localhost:3000/users/${userId}`, {
+        method: "DELETE",
+      });
+      setUsers(users.filter(u => u.id !== userId));
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return "just now";
+    if (minutes < 60) return `${minutes} min ago`;
+    if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
+    return date.toLocaleDateString();
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -82,7 +113,9 @@ export function Users() {
           <h1 className="text-3xl font-semibold text-white mb-1">User Management</h1>
           <p className="text-[#9CA3AF]">Manage users, roles, and permissions</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#38BDF8] hover:bg-[#0EA5E9] text-white rounded-lg transition-colors">
+        <button 
+          onClick={() => setAddUserDialogOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-[#38BDF8] hover:bg-[#0EA5E9] text-white rounded-lg transition-colors">
           <UserPlus className="w-4 h-4" />
           Add User
         </button>
@@ -94,7 +127,7 @@ export function Users() {
           <div className="w-10 h-10 rounded-lg bg-[#38BDF8]/10 flex items-center justify-center mb-3">
             <UsersIcon className="w-5 h-5 text-[#38BDF8]" />
           </div>
-          <div className="mono text-3xl font-semibold text-white mb-1">24</div>
+          <div className="mono text-3xl font-semibold text-white mb-1">{users.length}</div>
           <div className="text-sm text-[#9CA3AF]">Total Users</div>
         </div>
 
@@ -102,7 +135,7 @@ export function Users() {
           <div className="w-10 h-10 rounded-lg bg-[#10B981]/10 flex items-center justify-center mb-3">
             <UsersIcon className="w-5 h-5 text-[#10B981]" />
           </div>
-          <div className="mono text-3xl font-semibold text-white mb-1">18</div>
+          <div className="mono text-3xl font-semibold text-white mb-1">{users.filter(u => u.status === 'active').length}</div>
           <div className="text-sm text-[#9CA3AF]">Active Now</div>
         </div>
 
@@ -110,7 +143,7 @@ export function Users() {
           <div className="w-10 h-10 rounded-lg bg-[#F59E0B]/10 flex items-center justify-center mb-3">
             <Shield className="w-5 h-5 text-[#F59E0B]" />
           </div>
-          <div className="mono text-3xl font-semibold text-white mb-1">4</div>
+          <div className="mono text-3xl font-semibold text-white mb-1">{users.filter(u => u.role === 'Admin').length}</div>
           <div className="text-sm text-[#9CA3AF]">Admin Roles</div>
         </div>
 
@@ -118,7 +151,7 @@ export function Users() {
           <div className="w-10 h-10 rounded-lg bg-[#38BDF8]/10 flex items-center justify-center mb-3">
             <Key className="w-5 h-5 text-[#38BDF8]" />
           </div>
-          <div className="mono text-3xl font-semibold text-white mb-1">42</div>
+          <div className="mono text-3xl font-semibold text-white mb-1">{users.reduce((sum, u) => sum + u.sessions, 0)}</div>
           <div className="text-sm text-[#9CA3AF]">Active Sessions</div>
         </div>
       </div>
@@ -138,62 +171,75 @@ export function Users() {
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
-                <tr key={user.id} className="border-b border-[#1f2937]/50 hover:bg-[#1a2332] transition-colors">
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#38BDF8] to-[#0EA5E9] flex items-center justify-center text-sm font-semibold text-white">
-                        {user.avatar}
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-white">{user.name}</div>
-                        <div className="text-xs text-[#9CA3AF] mono">{user.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span
-                      className={`inline-flex px-2 py-1 rounded-full text-xs border ${
-                        roleColors[user.role as keyof typeof roleColors]
-                      }`}
-                    >
-                      {user.role}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs ${
-                        user.status === "active"
-                          ? "bg-[#10B981]/10 text-[#10B981]"
-                          : "bg-[#9CA3AF]/10 text-[#9CA3AF]"
-                      }`}
-                    >
-                      <div
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          user.status === "active" ? "bg-[#10B981]" : "bg-[#9CA3AF]"
-                        }`}
-                      ></div>
-                      {user.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="text-sm text-[#9CA3AF]">{user.lastLogin}</span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="mono text-sm text-white">{user.sessions}</span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 hover:bg-[#1f2937] rounded transition-colors text-[#9CA3AF] hover:text-[#38BDF8]">
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button className="p-2 hover:bg-[#1f2937] rounded transition-colors text-[#9CA3AF] hover:text-[#EF4444]">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-[#9CA3AF]">
+                    Loading users...
                   </td>
                 </tr>
-              ))}
+              ) : (
+                users.map((user) => (
+                  <tr key={user.id} className="border-b border-[#1f2937]/50 hover:bg-[#1a2332] transition-colors">
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#38BDF8] to-[#0EA5E9] flex items-center justify-center text-sm font-semibold text-white">
+                          {user.avatar}
+                        </div>
+                        <div>
+                          <div className="text-sm font-semibold text-white">{user.name}</div>
+                          <div className="text-xs text-[#9CA3AF] mono">{user.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span
+                        className={`inline-flex px-2 py-1 rounded-full text-xs border ${
+                          roleColors[user.role as keyof typeof roleColors] || "bg-[#9CA3AF]/10 text-[#9CA3AF]"
+                        }`}
+                      >
+                        {user.role}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs ${
+                          user.status === "active"
+                            ? "bg-[#10B981]/10 text-[#10B981]"
+                            : "bg-[#9CA3AF]/10 text-[#9CA3AF]"
+                        }`}
+                      >
+                        <div
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            user.status === "active" ? "bg-[#10B981]" : "bg-[#9CA3AF]"
+                          }`}
+                        ></div>
+                        {user.status}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className="text-sm text-[#9CA3AF]">{formatDate(user.lastLogin)}</span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className="mono text-sm text-white">{user.sessions}</span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => handleEditClick(user)}
+                          className="p-2 hover:bg-[#1f2937] rounded transition-colors text-[#9CA3AF] hover:text-[#38BDF8]">
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(user.id)}
+                          className="p-2 hover:bg-[#1f2937] rounded transition-colors text-[#9CA3AF] hover:text-[#EF4444]"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -211,7 +257,9 @@ export function Users() {
               <div key={role} className="p-3 bg-[#0B0F17] rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <span className={`text-sm px-2 py-1 rounded-full border ${colorClass}`}>{role}</span>
-                  <button className="text-xs text-[#38BDF8] hover:text-[#0EA5E9]">Edit</button>
+                  <button 
+                    onClick={() => setRoleManagementOpen(true)}
+                    className="text-xs text-[#38BDF8] hover:text-[#0EA5E9]">Edit</button>
                 </div>
                 <div className="text-xs text-[#9CA3AF] space-y-1">
                   <div>• Read/Write access to servers</div>
@@ -220,6 +268,15 @@ export function Users() {
                 </div>
               </div>
             ))}
+            <button
+              onClick={() => setRoleManagementOpen(true)}
+              className="w-full p-3 bg-[#0B0F17] hover:bg-[#1a2332] rounded-lg text-left transition-colors border-2 border-dashed border-[#1f2937] hover:border-[#38BDF8]/50"
+            >
+              <div className="text-sm text-[#38BDF8] flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                Manage All Roles
+              </div>
+            </button>
           </div>
         </div>
 
@@ -250,9 +307,47 @@ export function Users() {
         </div>
       </div>
 
+      <AddUserDialog
+        isOpen={addUserDialogOpen}
+        onClose={() => setAddUserDialogOpen(false)}
+        onSuccess={handleAddUserSuccess}
+      />
+
+      <EditUserDialog
+        isOpen={editUserDialogOpen}
+        onClose={() => setEditUserDialogOpen(false)}
+        onSave={handleEditUserSave}
+        user={userToEdit}
+      />
+
       <RotateAPIKeysDialog
         isOpen={isRotateKeysDialogOpen}
         onClose={() => setIsRotateKeysDialogOpen(false)}
+      />
+
+      <ConfirmDialog
+        isOpen={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete User"
+        message="Are you sure you want to delete this user? This will revoke all access permissions and remove the user from all projects. This action cannot be undone."
+        confirmText="Delete User"
+        cancelText="Keep User"
+        variant="danger"
+        icon="warning"
+      />
+
+      <SuccessDialog
+        isOpen={successDialogOpen}
+        onClose={() => setSuccessDialogOpen(false)}
+        title="Invitation Sent"
+        message={`An invitation link has been sent to ${invitedEmail}. The user will receive an email with instructions to set up their account and join your organization.`}
+        details="The invitation link will expire in 7 days."
+      />
+
+      <RoleManagementDialog
+        isOpen={roleManagementOpen}
+        onClose={() => setRoleManagementOpen(false)}
       />
     </div>
   );

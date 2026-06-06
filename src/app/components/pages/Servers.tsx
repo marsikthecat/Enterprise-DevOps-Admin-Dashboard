@@ -2,85 +2,59 @@ import { Link } from "react-router";
 import { Server, Cpu, HardDrive, Network, Clock, ChevronRight, Plus } from "lucide-react";
 import { useState } from "react";
 import { DeployServerDialog } from "../dialogs/DeployServerDialog";
+import { useEffect } from "react";
 
-const servers = [
-  {
-    id: "srv-web-01",
-    type: "Web Server",
-    status: "healthy",
-    cpu: 45,
-    memory: 62,
-    disk: 48,
-    network: "2.4 GB/s",
-    uptime: "142d 8h",
-    location: "US-EAST-1A",
-    ip: "10.0.1.24",
-  },
-  {
-    id: "srv-web-02",
-    type: "Web Server",
-    status: "healthy",
-    cpu: 38,
-    memory: 58,
-    disk: 52,
-    network: "2.1 GB/s",
-    uptime: "142d 8h",
-    location: "US-EAST-1B",
-    ip: "10.0.1.25",
-  },
-  {
-    id: "srv-db-01",
-    type: "Database",
-    status: "healthy",
-    cpu: 72,
-    memory: 81,
-    disk: 73,
-    network: "8.2 GB/s",
-    uptime: "342d 14h",
-    location: "US-EAST-1A",
-    ip: "10.0.2.10",
-  },
-  {
-    id: "srv-db-02",
-    type: "Database",
-    status: "healthy",
-    cpu: 68,
-    memory: 79,
-    disk: 71,
-    network: "7.9 GB/s",
-    uptime: "342d 14h",
-    location: "US-EAST-1B",
-    ip: "10.0.2.11",
-  },
-  {
-    id: "srv-db-03",
-    type: "Database",
-    status: "warning",
-    cpu: 91,
-    memory: 85,
-    disk: 68,
-    network: "9.4 GB/s",
-    uptime: "89d 3h",
-    location: "US-EAST-1C",
-    ip: "10.0.2.12",
-  },
-  {
-    id: "srv-cache-01",
-    type: "Cache",
-    status: "healthy",
-    cpu: 24,
-    memory: 34,
-    disk: 12,
-    network: "1.2 GB/s",
-    uptime: "201d 22h",
-    location: "US-EAST-1A",
-    ip: "10.0.3.5",
-  },
-];
+export interface ServerInfo {
+  id: string;
+  type: string;
+  status: string;
+  cpu: number;
+  memory: number;
+  disk: number;
+  network: string;
+  uptime: string;
+  location: string;
+  ip: string;
+}
 
 export function Servers() {
 
   const [isDeployDialogOpen, setIsDeployDialogOpen] = useState(false);
+  const [serverList, setServerList] = useState<ServerInfo[]>([]);
+
+  const fetchServers = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/servers");
+      const data = await response.json();
+      setServerList(data);
+    } catch (error) {
+      console.error("Error fetching servers:", error);
+    }
+  };
+  useEffect(() => {
+    fetchServers();
+  }, []);
+
+  const deployServer = async (serverData: Partial<ServerInfo>) => {
+    try {
+      const response = await fetch("http://localhost:3000/servers", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(serverData),
+      });
+      if (response.ok) {
+        const newServer = await response.json();
+        setServerList((prev) => [...prev, newServer]);
+      } else {
+        console.error("Failed to deploy server");
+      }
+    } catch (error) {
+      console.error("Error deploying server:", error);
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -98,7 +72,7 @@ export function Servers() {
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        {servers.map((server) => (
+        {serverList.map((server) => (
           <Link
             key={server.id}
             to={`/servers/${server.id}`}
@@ -195,6 +169,7 @@ export function Servers() {
       <DeployServerDialog
         isOpen={isDeployDialogOpen}
         onClose={() => setIsDeployDialogOpen(false)}
+        onDeploy={deployServer}
       />
     </div>
   );

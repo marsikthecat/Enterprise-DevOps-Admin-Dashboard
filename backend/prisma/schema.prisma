@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id       String @id @default(uuid())
+  name     String
+  email    String
+  role     String
+  status   String
+  lastLogin DateTime
+  sessions  Int
+  avatar   String
+  createdAt DateTime @default(now())
+}
+
+model Server {
+  id        String @id @default(uuid())
+  type      String
+  status    String
+  cpu       Int
+  memory    Int
+  disk      Int
+  uptime    String
+  network   String
+  location  String
+  ipAddress String
+  containers Container[]
+  processes   Process[]
+  createdAt DateTime @default(now())
+}
+
+model Container {
+  id        String @id
+  image     String
+  status    String
+  ports     String
+  cpu       Int
+  memory    Int
+  serverId  String
+  server    Server @relation(fields: [serverId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Process {
+  id        String @id @default(uuid())
+  pid       Int
+  name      String
+  user      String
+  cpu       Float
+  memory    Float
+  threads   Int
+  status    String
+  serverId  String
+  server    Server @relation(fields: [serverId], references: [id])
+  createdAt DateTime @default(now())
+  uptime    String
+}
+
+model Pipeline {
+  id        String @id @default(uuid())
+  name      String
+  image     String
+  status    String
+  lastRun   DateTime
+}
+
+model Alert {
+  id        String @id @default(uuid())
+  severity  String
+  title     String
+  description String
+  time        String
+  status      String
+}
+
+model Volnerability {
+  id          String @id @default(uuid())
+  package     String
+  version     String
+  severity    String
+  cveId       String
+  serverCount Int
+}
