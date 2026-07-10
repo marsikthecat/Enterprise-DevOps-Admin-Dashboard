@@ -1,76 +1,12 @@
 import { Activity, Search, Filter } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { X } from "lucide-react";
-
-export interface Process {
-  pid: number;
-  id: string;
-  serverId: string;
-  user: string; 
-  cpu: number;
-  memory: number;
-  threads: number;
-  status: string;
-  uptime: string;
-  name: string;
-  createdAt: string;
-}
+import { useProcessStore } from "../../states/processCpuState";
+import { Process } from "../../states/processCpuState";
 
 export function Processes() {
-  const [processes, setProcesses] = useState<Process[]>([]);
-  let seconds = 0;
 
-  const fetchProcesses = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/processes");
-      const data = await response.json();
-      setProcesses(data);
-    } catch (error) {
-      console.error("Error fetching processes:", error);
-    }
-  }
-const makeProcessesAlive = () => {
-  seconds++;
-  setProcesses(prev =>
-    prev.map(process => {
-      const randomNum = Math.random();
-      let fluctuation;
-      if (randomNum > 0.6) {
-        fluctuation = 0.1;
-      } else if (randomNum < 0.3) {
-        fluctuation = -0.1;
-      } else {
-        fluctuation = 0.2;
-      }
-
-      let memoryFluctuation = 0;
-      if (seconds % 60 == 0) {
-        memoryFluctuation = fluctuation * 10;
-        seconds %= 60;
-      }
-      let threadFluctuation = 0;
-      if (seconds % 180 == 0) {
-        threadFluctuation = (-fluctuation) * 10;
-      }
-      return {
-        ...process,
-        cpu: Number((process.cpu + fluctuation).toFixed(1)),
-        memory: Number((process.memory + memoryFluctuation)),
-        threads: Number((process.threads > 2 ? process.threads + threadFluctuation : process.threads + 1))
-      };
-    })
-  );
-};
-
-  useEffect(() => {
-    fetchProcesses();
-    const interval = setInterval(() => {
-      makeProcessesAlive();
-    }, 1000);
-    return () => {
-      clearInterval(interval);
-    }
-  }, []);
+  const processes = useProcessStore(s => s.processes);
 
   const countSleeping = (processes: Process[]) => {
     let count = 0;

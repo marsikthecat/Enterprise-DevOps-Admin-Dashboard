@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { Server, Cpu, HardDrive, Network, Clock, ChevronRight, Plus } from "lucide-react";
 import { useState } from "react";
-import { DeployServerDialog } from "../dialogs/DeployServerDialog";
+import { DeployServerDialog } from "./dialogs/DeployServerDialog";
 import { useEffect } from "react";
 
 export interface ServerInfo {

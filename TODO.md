@@ -124,13 +124,3 @@ Me: I am not fooling you, sir – the alert says it's added.
 
 */
 ```
-
-## Next Steps
-
-- Add Roles and Permissions to prisma and seed
-- Backend: Crud for Roles and Permissions
-- Backend: Crud for users
-- Container: Add new status, kill, restart and stop logic
-- Find out how to wire cpu average of processes to dashboard (maybe with backend instead of store)
-- For processes in each server: show realtime % identical to processes
-

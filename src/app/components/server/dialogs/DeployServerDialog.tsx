@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X, Server, Cpu, HardDrive, MapPin } from "lucide-react";
-import { ServerInfo } from "../pages/Servers";
+import { ServerInfo } from "../Servers";
 
 interface DeployServerDialogProps {
   isOpen: boolean;

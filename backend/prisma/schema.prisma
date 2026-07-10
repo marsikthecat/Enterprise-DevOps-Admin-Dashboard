@@ -11,14 +11,15 @@ datasource db {
 }
 
 model User {
-  id       String @id @default(uuid())
-  name     String
-  email    String
-  role     String
-  status   String
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  roleId    String?
+  role      Role?    @relation(fields: [roleId], references: [id])
+  status    String
   lastLogin DateTime
   sessions  Int
-  avatar   String
+  avatar    String
   createdAt DateTime @default(now())
 }
 
@@ -66,27 +67,71 @@ model Process {
 }
 
 model Pipeline {
-  id        String @id @default(uuid())
-  name      String
-  image     String
-  status    String
-  lastRun   DateTime
+  id      String   @id @default(uuid())
+  name    String
+  image   String
+  status  String
+  lastRun DateTime
 }
 
 model Alert {
-  id        String @id @default(uuid())
-  severity  String
-  title     String
+  id          String @id @default(uuid())
+  severity    String
+  title       String
   description String
   time        String
   status      String
 }
 
-model Volnerability {
+model Role {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  editable    Boolean
+  users       User[]
+  permissions Permission[]
+}
+
+model Permission {
+  id       String @id @default(uuid())
+  key      String
+  name     String
+  category String
+  roleId   String
+  role     Role   @relation(fields: [roleId], references: [id])
+}
+
+model StorageRegion {
+  id          String @id @default(uuid())
+  region      String @unique
+  totalMemory Float
+  usedMemory  Float
+  files       Int
+  lat         Int
+  lng         Int
+}
+
+model RecentUpload {
+  id         String @id @default(uuid())
+  fileName   String @unique
+  fileSize   Float
+  uploadedAt String
+  status     String
+}
+
+model RecentAlert {
+  id          String @id @default(uuid())
+  severity    String
+  title       String
+  description String
+  time        String
+  status      String
+}
+
+model Vulnerability {
   id          String @id @default(uuid())
   package     String
   version     String
   severity    String
-  cveId       String
+  cve         String
   serverCount Int
 }

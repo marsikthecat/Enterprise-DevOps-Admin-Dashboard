@@ -1,11 +1,11 @@
 import { Users as UsersIcon, UserPlus, Shield, Key, Edit, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { RotateAPIKeysDialog } from "../dialogs/RotateApiKeysDialog";
-import { AddUserDialog } from "../dialogs/AddUserDialog";
-import { ConfirmDialog } from "../dialogs/ConfirmDialog";
-import { EditUserDialog } from "../dialogs/EditUserDialog";
-import { SuccessDialog } from "../dialogs/SuccessDialog";
-import { RoleManagementDialog } from "../dialogs/RoleManagementDialog";
+import { RotateAPIKeysDialog } from "./dialogs/RotateApiKeysDialog";
+import { AddUserDialog } from "./dialogs/AddUserDialog";
+import { ConfirmDialog } from "../../common/dialogs/ConfirmDialog";
+import { EditUserDialog } from "./dialogs/EditUserDialog";
+import { SuccessDialog } from "../../common/dialogs/SuccessDialog";
+import { RoleManagementDialog } from "./dialogs/RoleManagementDialog";
 
 
 const roleColors = {
@@ -19,19 +19,34 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: string;
+  role: Role;
   status: string;
   lastLogin: string;
   sessions: number;
   avatar: string;
 }
 
+export interface Role {
+  id: string | number;
+  name: string;
+  category?: string;
+  permissions: Permission[];
+  editable: boolean;
+}
+
+export interface Permission {
+  id: string;
+  name: string;
+  category: string;
+}
+
 export function Users() {
   const [users, setUsers] = useState<User[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
   const [isRotateKeysDialogOpen, setIsRotateKeysDialogOpen] = useState(false);
 
-   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<number | null>(null);
   const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
   const [editUserDialogOpen, setEditUserDialogOpen] = useState(false);
@@ -65,20 +80,30 @@ export function Users() {
   };
 
   useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const [usersResponse, rolesResponse] = await Promise.all([
+          fetch("http://localhost:3000/users"),
+          fetch("http://localhost:3000/roles"),
+        ]);
+
+        if (usersResponse.ok) {
+          const usersData = await usersResponse.json();
+          setUsers(usersData);
+        }
+
+        if (rolesResponse.ok) {
+          setRoles(await rolesResponse.json());
+        }
+      } catch (error) {
+        console.error("Failed to fetch users:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchUsers();
   }, []);
-
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/users");
-      const data = await response.json();
-      setUsers(data);
-    } catch (error) {
-      console.error("Failed to fetch users:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDeleteUser = async (userId: string) => {
     try {
@@ -143,7 +168,7 @@ export function Users() {
           <div className="w-10 h-10 rounded-lg bg-[#F59E0B]/10 flex items-center justify-center mb-3">
             <Shield className="w-5 h-5 text-[#F59E0B]" />
           </div>
-          <div className="mono text-3xl font-semibold text-white mb-1">{users.filter(u => u.role === 'Admin').length}</div>
+          <div className="mono text-3xl font-semibold text-white mb-1">{users.filter((u) => u.role?.name === 'Admin').length}</div>
           <div className="text-sm text-[#9CA3AF]">Admin Roles</div>
         </div>
 
@@ -194,10 +219,10 @@ export function Users() {
                     <td className="py-3 px-4">
                       <span
                         className={`inline-flex px-2 py-1 rounded-full text-xs border ${
-                          roleColors[user.role as keyof typeof roleColors] || "bg-[#9CA3AF]/10 text-[#9CA3AF]"
+                          roleColors[(user.role?.name ?? "Developer") as keyof typeof roleColors] || "bg-[#9CA3AF]/10 text-[#9CA3AF]"
                         }`}
                       >
-                        {user.role}
+                        {user.role?.name ?? "Developer"}
                       </span>
                     </td>
                     <td className="py-3 px-4">
@@ -253,7 +278,23 @@ export function Users() {
             Role Permissions
           </h3>
           <div className="space-y-3">
-            {Object.entries(roleColors).map(([role, colorClass]) => (
+            {roles.length > 0 ? roles.map((role) => {
+              const colorClass = roleColors[role.name as keyof typeof roleColors] || "bg-[#9CA3AF]/10 text-[#9CA3AF] border-[#9CA3AF]/30";
+              return (
+                <div key={role.id} className="p-3 bg-[#0B0F17] rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`text-sm px-2 py-1 rounded-full border ${colorClass}`}>{role.name}</span>
+                    <button
+                      onClick={() => setRoleManagementOpen(true)}
+                      className="text-xs text-[#38BDF8] hover:text-[#0EA5E9]">Edit</button>
+                  </div>
+                  <div className="text-xs text-[#9CA3AF] space-y-1">
+                    <div>• {role.permissions?.length ?? 0} permissions configured</div>
+                    <div>• {users.filter((user) => user.role?.id === role.id).length} assigned users</div>
+                  </div>
+                </div>
+              );
+            }) : Object.entries(roleColors).map(([role, colorClass]) => (
               <div key={role} className="p-3 bg-[#0B0F17] rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <span className={`text-sm px-2 py-1 rounded-full border ${colorClass}`}>{role}</span>
@@ -267,8 +308,7 @@ export function Users() {
                   {role === "Admin" && <div>• User management access</div>}
                 </div>
               </div>
-            ))}
-            <button
+            ))}            <button
               onClick={() => setRoleManagementOpen(true)}
               className="w-full p-3 bg-[#0B0F17] hover:bg-[#1a2332] rounded-lg text-left transition-colors border-2 border-dashed border-[#1f2937] hover:border-[#38BDF8]/50"
             >
@@ -348,6 +388,7 @@ export function Users() {
       <RoleManagementDialog
         isOpen={roleManagementOpen}
         onClose={() => setRoleManagementOpen(false)}
+        roles={roles}
       />
     </div>
   );

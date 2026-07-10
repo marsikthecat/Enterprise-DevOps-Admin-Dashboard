@@ -189,16 +189,253 @@ const servers = [
   },
 ];
 
+const storageRegions = [
+  { 
+    region: "US-EAST", 
+    usedMemory: 2.4, 
+    totalMemory: 5, 
+    files: 12847, 
+    lat: 40, 
+    lng: -74 
+  },
+  { 
+    region: "US-WEST", 
+    usedMemory: 1.8, 
+    totalMemory: 5, 
+    files: 8923, 
+    lat: 37, 
+    lng: -122 
+  },
+  { 
+    region: "EU-CENTRAL", 
+    usedMemory: 3.2, 
+    totalMemory: 5, 
+    files: 15234, 
+    lat: 50, 
+    lng: 8 },
+  { 
+    region: "ASIA-PACIFIC", 
+    usedMemory: 1.5, 
+    totalMemory: 5, 
+    files: 6432, 
+    lat: 35, 
+    lng: 139 
+  },
+];
+
+const recentUploads = [
+  {
+    fileName: "backup-db-20260516.tar.gz",
+    fileSize: 4.2,
+    uploadedAt: "2 min ago",
+    status: "complete"
+  },
+  {
+    fileName: "logs-web-20260516.zip",
+    fileSize: 0.89,
+    uploadedAt: "15 min ago",
+    status: "complete"
+  },
+  {
+    fileName: "deployment-package.tar",
+    fileSize: 1.2,
+    uploadedAt: "1 hour ago",
+    status: "syncing"
+  },
+  {
+    fileName: "analytics-export.csv",
+    fileSize: 0.045,
+    uploadedAt: "3 hours ago",
+    status: "complete"
+  },
+];
+
+const recentAlerts = [
+  {
+    severity: "critical",
+    title: "Multiple failed login attempts",
+    description: "5 failed attempts from IP 203.0.113.42",
+    time: "5 min ago",
+    status: "investigating",
+  },
+  {
+    severity: "warning",
+    title: "SSL certificate expiring",
+    description: "Certificate for api.ops.dev expires in 7 days",
+    time: "2 hours ago",
+    status: "pending",
+  },
+  {
+    severity: "info",
+    title: "New SSH key added",
+    description: "User alice@ops.dev added new SSH key",
+    time: "3 hours ago",
+    status: "resolved",
+  },
+  {
+    severity: "warning",
+    title: "Unusual API access pattern",
+    description: "High request rate from new client",
+    time: "5 hours ago",
+    status: "monitoring",
+  },
+];
+
+const vulnerabilities = [
+  { 
+    package: "openssl", 
+    version: "1.1.1k", 
+    severity: "high",
+    cve: "CVE-2024-1234",
+    serverCount: 3 
+  },
+  { 
+    package: "nginx", 
+    version: "1.18.0",
+    severity: "medium", 
+    cve: "CVE-2024-5678", 
+    serverCount: 6 
+  },
+  { 
+    package: "postgres",
+    version: "13.2", 
+    severity: "low",
+    cve: "CVE-2024-9012", 
+    serverCount: 4 
+  },
+];
+
+const allPermissions = [
+  { id: "servers.read", name: "View Servers", category: "Servers" },
+  { id: "servers.write", name: "Manage Servers", category: "Servers" },
+  { id: "servers.deploy", name: "Deploy Servers", category: "Servers" },
+  { id: "servers.delete", name: "Delete Servers", category: "Servers" },
+  { id: "containers.read", name: "View Containers", category: "Containers" },
+  { id: "containers.write", name: "Manage Containers", category: "Containers" },
+  { id: "containers.deploy", name: "Deploy Containers", category: "Containers" },
+  { id: "network.read", name: "View Network", category: "Network" },
+  { id: "network.write", name: "Configure Network", category: "Network" },
+  { id: "users.read", name: "View Users", category: "Users" },
+  { id: "users.write", name: "Manage Users", category: "Users" },
+  { id: "users.delete", name: "Delete Users", category: "Users" },
+  { id: "security.read", name: "View Security", category: "Security" },
+  { id: "security.write", name: "Manage Security", category: "Security" },
+  { id: "cloud.read", name: "View Cloud Storage", category: "Cloud" },
+  { id: "cloud.write", name: "Manage Cloud Storage", category: "Cloud" },
+];
+
+const defaultRoles = [
+  {
+    name: "Admin",
+    permissions: [
+      { id: "servers.read", name: "View Servers", category: "Servers" },
+      { id: "servers.write", name: "Manage Servers", category: "Servers" },
+      { id: "servers.deploy", name: "Deploy Servers", category: "Servers" },
+      { id: "servers.delete", name: "Delete Servers", category: "Servers" },
+      { id: "containers.read", name: "View Containers", category: "Containers" },
+      { id: "containers.write", name: "Manage Containers", category: "Containers" },
+      { id: "containers.deploy", name: "Deploy Containers", category: "Containers" },
+      { id: "network.read", name: "View Network", category: "Network" },
+      { id: "network.write", name: "Configure Network", category: "Network" },
+      { id: "users.read", name: "View Users", category: "Users" },
+      { id: "users.write", name: "Manage Users", category: "Users" },
+      { id: "users.delete", name: "Delete Users", category: "Users" },
+      { id: "security.read", name: "View Security", category: "Security" },
+      { id: "security.write", name: "Manage Security", category: "Security" },
+      { id: "cloud.read", name: "View Cloud Storage", category: "Cloud" },
+      { id: "cloud.write", name: "Manage Cloud Storage", category: "Cloud" },
+    ],
+    editable: false,
+  },
+  {
+    name: "DevOps Engineer",
+    permissions: [
+      { id: "servers.read", name: "View Servers", category: "Servers" },
+      { id: "servers.write", name: "Manage Servers", category: "Servers" },
+      { id: "servers.deploy", name: "Deploy Servers", category: "Servers" }, 
+      { id: "containers.read", name: "View Containers", category: "Containers" },
+      { id: "containers.write", name: "Manage Containers", category: "Containers" },
+      { id: "containers.deploy", name: "Deploy Containers", category: "Containers" },
+      { id: "network.read", name: "View Network", category: "Network" },
+      { id: "network.write", name: "Configure Network", category: "Network" },
+    ],
+    editable: true,
+  },
+  {
+    name: "Developer",
+    permissions: [
+      { id: "servers.read", name: "View Servers", category: "Servers" },
+      { id: "containers.read", name: "View Containers", category: "Containers" },
+      { id: "network.read", name: "View Network", category: "Network" },
+    ],
+    editable: true,
+  },
+  {
+    name: "Security",
+    permissions: [
+      { id: "security.read", name: "View Security", category: "Security" },
+      { id: "security.write", name: "Manage Security", category: "Security" },
+    ],
+    editable: true,
+  }
+];
+
+async function resetDatabase() {
+  await prisma.$transaction([
+    prisma.permission.deleteMany(),
+    prisma.user.deleteMany(),
+    prisma.container.deleteMany(),
+    prisma.process.deleteMany(),
+    prisma.server.deleteMany(),
+    prisma.storageRegion.deleteMany(),
+    prisma.recentUpload.deleteMany(),
+    prisma.recentAlert.deleteMany(),
+    prisma.vulnerability.deleteMany(),
+    prisma.pipeline.deleteMany(),
+    prisma.alert.deleteMany(),
+    prisma.role.deleteMany(),
+  ]);
+}
+
 async function main() {
   console.log('Seeding database...');
 
+  await resetDatabase();
+
+  const roleMap = new Map();
+
+  for (const role of defaultRoles) {
+    const createdRole = await prisma.role.create({
+      data: {
+        name: role.name,
+        editable: role.editable,
+      },
+    });
+
+    roleMap.set(role.name, createdRole.id);
+
+    for (const permission of role.permissions) {
+      await prisma.permission.create({
+        data: {
+          key: permission.id,
+          name: permission.name,
+          category: permission.category,
+          roleId: createdRole.id,
+        },
+      });
+    }
+  }
+
   for (const user of users) {
+    const { role, ...userData } = user;
+
     await prisma.user.create({
       data: {
-        ...user,
+        ...userData,
+        roleId: roleMap.get(role) ?? null,
         lastLogin: new Date(),
-        sessions: Math.floor(Math.random() * 4)
-      }
+        sessions: Math.floor(Math.random() * 4),
+      },
     });
   }
   for (const server of servers) {
@@ -213,6 +450,26 @@ async function main() {
           create: processes
         }
       }
+    });
+  }
+  for (const region of storageRegions) {
+    await prisma.storageRegion.create({
+      data: region
+    });
+  }
+  for (const upload of recentUploads) {
+    await prisma.recentUpload.create({
+      data: upload
+    });
+  }
+  for (const alert of recentAlerts) {
+    await prisma.recentAlert.create({
+      data: alert
+    });
+  }
+  for (const vuln of vulnerabilities) {
+    await prisma.vulnerability.create({
+      data: vuln
     });
   }
   console.log('Seeding complete!');
