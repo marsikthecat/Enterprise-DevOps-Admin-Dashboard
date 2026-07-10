@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "dev": "node src/index.js",
+    "dev": "node app.js",
     "migrate": "npx prisma migrate dev",
     "seed": "node prisma/seed.js",
     "studio": "npx prisma studio"

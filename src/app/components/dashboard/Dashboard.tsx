@@ -12,39 +12,44 @@ import {
 } from "recharts";
 import { useState, useEffect} from "react";
 import { useNetworkStore } from "../../states/networkTrafficState";
+import { useProcessStore } from "../../states/processCpuState";
 
 export function Dashboard() {
+
   const [cpuData, setCpuData] = useState(() => {
-  const now = Date.now();
+    const now = Date.now();
+    return Array.from({ length: 30 }, (_, i) => ({
+      time: new Date(now - (29 - i) * 1000).toLocaleTimeString(),
+      value: "10",
+    }));
+  });
+  const avgCpu = useProcessStore(state => {
+    if (state.processes.length === 0) return 0;
+    return (
+      state.processes.reduce((sum, p) => sum + p.cpu, 0) /
+      state.processes.length
+    );
+  });
 
-  return Array.from({ length: 30 }, (_, i) => ({
-    time: new Date(now - (29 - i) * 1000).toLocaleTimeString(),
-    value: Math.floor(Math.random() * 50),
-  }));
-});
-
-useEffect(() => {
-  const interval = setInterval(() => {
+  useEffect(() => {
     setCpuData(prev => {
-      const lastValue = prev[prev.length - 1].value;
-
-      const fluctuation = Math.random() > 0.5 ? Math.floor(Math.random() * 10) + 1
-          : Math.floor(Math.random() * 1) - 10;
-
-      const newValue = Math.max(0, lastValue + fluctuation);
       return [
         ...prev.slice(1),
         {
           time: new Date().toLocaleTimeString(),
-          value: newValue,
+          value: avgCpu.toFixed(1),
         },
       ];
     });
-  }, 1000);
-  return () => clearInterval(interval);
-}, []);
+  }, [avgCpu]);
 
-const networkData = useNetworkStore(s => s.networkData);
+  const networkData = useNetworkStore(s => s.networkData);
+  const activeProcesses = useProcessStore(p => {
+    return (
+      p.processes.length
+    )
+  })
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -80,7 +85,7 @@ const networkData = useNetworkStore(s => s.networkData);
             </div>
             <div className="text-xs mono text-[#10B981]">+12%</div>
           </div>
-          <div className="mono text-3xl font-semibold text-white mb-1">1,247</div>
+          <div className="mono text-3xl font-semibold text-white mb-1">{activeProcesses}</div>
           <div className="text-sm text-[#9CA3AF]">Active Processes</div>
           <div className="mt-2 text-xs text-[#9CA3AF]">Across all nodes</div>
         </div>

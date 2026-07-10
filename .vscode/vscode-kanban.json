@@ -1,0 +1,26 @@
+{
+  "todo": [],
+  "in-progress": [
+    {
+      "assignedTo": {
+        "name": "me"
+      },
+      "category": "Concept/Idea",
+      "creation_time": "2026-06-19T21:31:20.413Z",
+      "description": {
+        "content": "Make an reality check and complete the app to make it more realistic:\n",
+        "mime": "text/markdown"
+      },
+      "details": {
+        "content": "Global corrections:\n- Sum of all servers input/output = global output (network)\n- Sum of all servers cpu usage = global cpu usage (should be there)\n\nServer corrections:\n- Sum of all containers cpu usage = servers cpu usage\n- Sum of all containers memory = servers memory usage\n- Sum of all containers input/output = server input/output\n\nContainer corrections:\n- has own cpu usage in % (of server cpu)\n- has own mem usage in Mb (mem of server)\n- complete all states: running, paused, starting, stopped, killed\n- container has input/output (network)\n- Detail View of container with:\n  - IP, ENV Variables, Mounted Volumes, Image, processes-list (usually 1-15)",
+        "mime": "text/markdown"
+      },
+      "id": "1",
+      "prio": 11,
+      "references": [],
+      "title": "Reality check and edits"
+    }
+  ],
+  "testing": [],
+  "done": []
+}

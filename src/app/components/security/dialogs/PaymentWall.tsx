@@ -1,6 +1,6 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog"
-import { Button } from "../ui/button"
-import { Badge } from "../ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../common/ui/dialog"
+import { Button } from "../../../common/ui/button"
+import { Badge } from "../../../common/ui/badge"
 
 export default function IncidentPaywallModal({
   open,

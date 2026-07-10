@@ -1,7 +1,24 @@
 import { Shield, AlertTriangle, CheckCircle, Key, Lock, Activity } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { useState } from "react";
-import IncidentPaywallModal from "../dialogs/PaymentWall";
+import { useEffect, useState } from "react";
+import IncidentPaywallModal from "./dialogs/PaymentWall";
+
+export interface Alert {
+  id: string;
+  title: string;
+  description: string;
+  severity: "critical" | "warning" | "info";
+  time: string;
+  status: "open" | "investigating" | "resolved";
+}
+
+export interface Vulnerability {
+  package: string;
+  version: string;
+  severity: "high" | "medium" | "low";
+  cve: string;
+  serverCount: number;
+}
 
 const securityEvents = [
   { time: "00:00", events: 12 },
@@ -13,50 +30,37 @@ const securityEvents = [
   { time: "23:59", events: 9 },
 ];
 
-const recentAlerts = [
-  {
-    id: 1,
-    severity: "critical",
-    title: "Multiple failed login attempts",
-    description: "5 failed attempts from IP 203.0.113.42",
-    time: "5 min ago",
-    status: "investigating",
-  },
-  {
-    id: 2,
-    severity: "warning",
-    title: "SSL certificate expiring",
-    description: "Certificate for api.ops.dev expires in 7 days",
-    time: "2 hours ago",
-    status: "pending",
-  },
-  {
-    id: 3,
-    severity: "info",
-    title: "New SSH key added",
-    description: "User alice@ops.dev added new SSH key",
-    time: "3 hours ago",
-    status: "resolved",
-  },
-  {
-    id: 4,
-    severity: "warning",
-    title: "Unusual API access pattern",
-    description: "High request rate from new client",
-    time: "5 hours ago",
-    status: "monitoring",
-  },
-];
-
-const vulnerabilities = [
-  { package: "openssl", version: "1.1.1k", severity: "high", cve: "CVE-2024-1234", servers: 3 },
-  { package: "nginx", version: "1.18.0", severity: "medium", cve: "CVE-2024-5678", servers: 6 },
-  { package: "postgres", version: "13.2", severity: "low", cve: "CVE-2024-9012", servers: 4 },
-];
-
 export function Security() {
 
   const [paywallOpen, setPaywallOpen] = useState(false)
+
+  const [recentAlerts, setRecentAlerts] = useState<Alert[]>([]);
+  const [vulnerabilities, setVulnerabilities] = useState<Vulnerability[]>([]);
+
+  useEffect(() => {
+    const fetchSecurityData = async () => {
+      try {
+        const [alertsResponse, vulnerabilitiesResponse] = await Promise.all([
+          fetch("http://localhost:3000/alerts"),
+          fetch("http://localhost:3000/vulnerabilities"),
+        ]);
+
+        if (alertsResponse.ok) {
+          setRecentAlerts(await alertsResponse.json());
+        }
+
+        if (vulnerabilitiesResponse.ok) {
+          setVulnerabilities(await vulnerabilitiesResponse.json());
+        }
+      } catch (error) {
+        console.error("Failed to fetch security data:", error);
+      }
+    };
+
+    fetchSecurityData();
+  }, []);
+
+  const criticalAlerts = recentAlerts.filter((alert) => alert.severity === "critical").length;
 
   return (
     <div className="p-6 space-y-6">
@@ -84,7 +88,7 @@ export function Security() {
           <div className="w-10 h-10 rounded-lg bg-[#EF4444]/10 flex items-center justify-center mb-3">
             <AlertTriangle className="w-5 h-5 text-[#EF4444]" />
           </div>
-          <div className="mono text-3xl font-semibold text-white mb-1">2</div>
+          <div className="mono text-3xl font-semibold text-white mb-1">{criticalAlerts}</div>
           <div className="text-sm text-[#9CA3AF]">Critical Alerts</div>
         </div>
 
@@ -92,7 +96,7 @@ export function Security() {
           <div className="w-10 h-10 rounded-lg bg-[#F59E0B]/10 flex items-center justify-center mb-3">
             <Shield className="w-5 h-5 text-[#F59E0B]" />
           </div>
-          <div className="mono text-3xl font-semibold text-white mb-1">3</div>
+          <div className="mono text-3xl font-semibold text-white mb-1">{vulnerabilities.length}</div>
           <div className="text-sm text-[#9CA3AF]">Vulnerabilities</div>
         </div>
 
@@ -223,7 +227,7 @@ export function Security() {
                     <span className="mono text-sm text-[#38BDF8]">{vuln.cve}</span>
                   </td>
                   <td className="py-3 px-4">
-                    <span className="text-sm text-[#9CA3AF]">{vuln.servers} servers</span>
+                    <span className="text-sm text-[#9CA3AF]">{vuln.serverCount} servers</span>
                   </td>
                   <td className="py-3 px-4 text-right">
                     <button className="text-sm text-[#38BDF8] hover:text-[#0EA5E9]">Patch</button>

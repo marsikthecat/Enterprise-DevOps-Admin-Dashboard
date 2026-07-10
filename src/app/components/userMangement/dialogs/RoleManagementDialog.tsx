@@ -1,81 +1,61 @@
-import { useState } from "react";
-import { X, Shield, Plus, Edit, Trash2, Check } from "lucide-react";
+import { useEffect, useState } from "react";
+import { X, Shield, Plus, Trash2, Check } from "lucide-react";
+import { Permission, Role } from "../Users";
 
 interface RoleManagementDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  roles: Role[];
 }
 
-const allPermissions = [
-  { id: "servers.read", name: "View Servers", category: "Servers" },
-  { id: "servers.write", name: "Manage Servers", category: "Servers" },
-  { id: "servers.deploy", name: "Deploy Servers", category: "Servers" },
-  { id: "servers.delete", name: "Delete Servers", category: "Servers" },
-  { id: "containers.read", name: "View Containers", category: "Containers" },
-  { id: "containers.write", name: "Manage Containers", category: "Containers" },
-  { id: "containers.deploy", name: "Deploy Containers", category: "Containers" },
-  { id: "network.read", name: "View Network", category: "Network" },
-  { id: "network.write", name: "Configure Network", category: "Network" },
-  { id: "users.read", name: "View Users", category: "Users" },
-  { id: "users.write", name: "Manage Users", category: "Users" },
-  { id: "users.delete", name: "Delete Users", category: "Users" },
-  { id: "security.read", name: "View Security", category: "Security" },
-  { id: "security.write", name: "Manage Security", category: "Security" },
-  { id: "cloud.read", name: "View Cloud Storage", category: "Cloud" },
-  { id: "cloud.write", name: "Manage Cloud Storage", category: "Cloud" },
+type ManagedRole = Role & { userCount?: number };
+
+const allPermissions: Permission[] = [
+  { id: "user:create", name: "Create users", category: "User Management" },
+  { id: "user:edit", name: "Edit users", category: "User Management" },
+  { id: "user:delete", name: "Delete users", category: "User Management" },
+  { id: "role:view", name: "View roles", category: "Role Management" },
+  { id: "role:edit", name: "Edit roles", category: "Role Management" },
+  { id: "role:assign", name: "Assign roles", category: "Role Management" },
+  { id: "server:deploy", name: "Deploy servers", category: "Infrastructure" },
+  { id: "server:restart", name: "Restart servers", category: "Infrastructure" },
+  { id: "security:audit", name: "View audit logs", category: "Security" },
+  { id: "security:settings", name: "Manage security settings", category: "Security" },
 ];
 
-const defaultRoles = [
-  {
-    id: 1,
-    name: "Admin",
-    permissions: allPermissions.map(p => p.id),
-    userCount: 4,
-    editable: false,
-  },
-  {
-    id: 2,
-    name: "DevOps Engineer",
-    permissions: [
-      "servers.read", "servers.write", "servers.deploy",
-      "containers.read", "containers.write", "containers.deploy",
-      "network.read", "network.write",
-      "security.read",
-    ],
-    userCount: 8,
-    editable: true,
-  },
-  {
-    id: 3,
-    name: "Developer",
-    permissions: [
-      "servers.read",
-      "containers.read",
-      "network.read",
-      "cloud.read", "cloud.write",
-    ],
-    userCount: 12,
-    editable: true,
-  },
-];
-
-export function RoleManagementDialog({ isOpen, onClose }: RoleManagementDialogProps) {
-  const [roles, setRoles] = useState(defaultRoles);
-  const [editingRole, setEditingRole] = useState<number | null>(null);
+export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles }: RoleManagementDialogProps) {
+  const [roles, setRoles] = useState<ManagedRole[]>([]);
+  const [editingRole, setEditingRole] = useState<string | number | null>(null);
   const [newRoleName, setNewRoleName] = useState("");
   const [isAddingRole, setIsAddingRole] = useState(false);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const mappedRoles = initialRoles.map((role) => ({
+      ...role,
+      userCount: 0,
+      editable: role.editable ?? true,
+      permissions: role.permissions ?? [],
+    }));
+
+    setRoles(mappedRoles);
+    setEditingRole(mappedRoles[0]?.id ?? null);
+    setIsAddingRole(false);
+    setNewRoleName("");
+  }, [isOpen, initialRoles]);
+
   if (!isOpen) return null;
 
-  const togglePermission = (roleId: number, permissionId: string) => {
+  const togglePermission = (roleId: string | number, permissionId: string) => {
     setRoles(roles.map(role => {
       if (role.id === roleId) {
-        const hasPermission = role.permissions.includes(permissionId);
+        const hasPermission = role.permissions.some(p => p.id === permissionId);
         return {
           ...role,
           permissions: hasPermission
-            ? role.permissions.filter(p => p !== permissionId)
-            : [...role.permissions, permissionId]
+            ? role.permissions.filter(p => p.id !== permissionId)
+            : [...role.permissions, allPermissions.find(p => p.id === permissionId)!],
         };
       }
       return role;
@@ -84,10 +64,11 @@ export function RoleManagementDialog({ isOpen, onClose }: RoleManagementDialogPr
 
   const handleAddRole = () => {
     if (newRoleName.trim()) {
+      const nextId = roles.length ? Math.max(...roles.map((r) => Number(r.id) || 0)) + 1 : 1;
       const newRole = {
-        id: Math.max(...roles.map(r => r.id)) + 1,
+        id: nextId,
         name: newRoleName,
-        permissions: [],
+        permissions: [] as Permission[],
         userCount: 0,
         editable: true,
       };
@@ -98,7 +79,7 @@ export function RoleManagementDialog({ isOpen, onClose }: RoleManagementDialogPr
     }
   };
 
-  const handleDeleteRole = (roleId: number) => {
+  const handleDeleteRole = (roleId: string | number) => {
     setRoles(roles.filter(role => role.id !== roleId));
     if (editingRole === roleId) {
       setEditingRole(null);
@@ -111,7 +92,7 @@ export function RoleManagementDialog({ isOpen, onClose }: RoleManagementDialogPr
     }
     acc[perm.category].push(perm);
     return acc;
-  }, {} as Record<string, typeof allPermissions>);
+  }, {} as Record<string, Permission[]>);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
@@ -238,7 +219,7 @@ export function RoleManagementDialog({ isOpen, onClose }: RoleManagementDialogPr
                         <div className="grid grid-cols-2 gap-2">
                           {permissions.map((permission) => {
                             const role = roles.find(r => r.id === editingRole);
-                            const isChecked = role?.permissions.includes(permission.id);
+                            const isChecked = role?.permission
                             const isDisabled = !role?.editable;
 
                             return (

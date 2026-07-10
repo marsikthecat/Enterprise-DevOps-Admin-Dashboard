@@ -1,23 +1,60 @@
 import { Cloud as CloudIcon, Upload, Download, HardDrive, Globe } from "lucide-react";
-import { useState } from "react";
-import { UploadBackupDialog } from "../dialogs/DeployToCloudDialog";
+import { useEffect, useState } from "react";
+import { UploadBackupDialog } from "./DeployToCloudDialog";
 
-const storageRegions = [
-  { region: "US-EAST", used: 2.4, total: 5, files: 12847, lat: 40, lng: -74 },
-  { region: "US-WEST", used: 1.8, total: 5, files: 8923, lat: 37, lng: -122 },
-  { region: "EU-CENTRAL", used: 3.2, total: 5, files: 15234, lat: 50, lng: 8 },
-  { region: "ASIA-PACIFIC", used: 1.5, total: 5, files: 6432, lat: 35, lng: 139 },
-];
+export interface StorageRegion {
+  id: string,
+  region: string,
+  totalMemory: number,
+  usedMemory: number,
+  files: number,
+  lat: number,
+  lng: number
+}
 
-const recentUploads = [
-  { file: "backup-db-20260516.tar.gz", size: "4.2 GB", time: "2 min ago", status: "complete" },
-  { file: "logs-web-20260516.zip", size: "890 MB", time: "15 min ago", status: "complete" },
-  { file: "deployment-package.tar", size: "1.2 GB", time: "1 hour ago", status: "syncing" },
-  { file: "analytics-export.csv", size: "45 MB", time: "3 hours ago", status: "complete" },
-];
+export interface Upload {
+  id: string,
+  fileName: string,
+  fileSize: number,
+  uploadedAt: string,
+  status: string,
+}
 
 export function Cloud() {
   const [isUploadBackupDialogOpen, setIsUploadBackupDialogOpen] = useState(false);
+
+  const [storageRegions, setStorageRegion] = useState<StorageRegion[]>([]);
+  const [recentUploads, setRecentUploads] = useState<Upload[]>([]);
+
+  useEffect(() => {
+    const fetchCloudData = async () => {
+      try {
+        const [regionsResponse, uploadsResponse] = await Promise.all([
+          fetch("http://localhost:3000/regions"),
+          fetch("http://localhost:3000/uploads"),
+        ]);
+
+        if (regionsResponse.ok) {
+          const regions = await regionsResponse.json();
+          setStorageRegion(regions);
+        }
+
+        if (uploadsResponse.ok) {
+          const uploads = await uploadsResponse.json();
+          setRecentUploads(uploads);
+        }
+      } catch (error) {
+        console.error("Failed to fetch cloud data:", error);
+      }
+    };
+
+    fetchCloudData();
+  }, []);
+
+  const totalUsedMemory = storageRegions.reduce((sum, region) => sum + region.usedMemory, 0);
+  const totalCapacity = storageRegions.reduce((sum, region) => sum + region.totalMemory, 0);
+  const totalFiles = storageRegions.reduce((sum, region) => sum + region.files, 0);
+  const totalUploadSize = recentUploads.reduce((sum, upload) => sum + (upload.fileSize || 0), 0);
   
   return (
     <div className="p-6 space-y-6">
@@ -41,11 +78,14 @@ export function Cloud() {
           <div className="w-10 h-10 rounded-lg bg-[#38BDF8]/10 flex items-center justify-center mb-3">
             <HardDrive className="w-5 h-5 text-[#38BDF8]" />
           </div>
-          <div className="mono text-3xl font-semibold text-white mb-1">8.9 TB</div>
+          <div className="mono text-3xl font-semibold text-white mb-1">{totalUsedMemory.toFixed(1)} TB</div>
           <div className="text-sm text-[#9CA3AF]">Total Used</div>
           <div className="mt-2">
             <div className="bg-[#1f2937] rounded-full h-2 overflow-hidden">
-              <div className="h-full bg-[#38BDF8] rounded-full" style={{ width: "45%" }}></div>
+              <div
+                className="h-full bg-[#38BDF8] rounded-full"
+                style={{ width: `${totalCapacity > 0 ? (totalUsedMemory / totalCapacity) * 100 : 0}%` }}
+              ></div>
             </div>
           </div>
         </div>
@@ -54,7 +94,7 @@ export function Cloud() {
           <div className="w-10 h-10 rounded-lg bg-[#10B981]/10 flex items-center justify-center mb-3">
             <CloudIcon className="w-5 h-5 text-[#10B981]" />
           </div>
-          <div className="mono text-3xl font-semibold text-white mb-1">43,436</div>
+          <div className="mono text-3xl font-semibold text-white mb-1">{totalFiles.toLocaleString()}</div>
           <div className="text-sm text-[#9CA3AF]">Total Files</div>
         </div>
 
@@ -62,7 +102,7 @@ export function Cloud() {
           <div className="w-10 h-10 rounded-lg bg-[#F59E0B]/10 flex items-center justify-center mb-3">
             <Upload className="w-5 h-5 text-[#F59E0B]" />
           </div>
-          <div className="mono text-3xl font-semibold text-white mb-1">124</div>
+          <div className="mono text-3xl font-semibold text-white mb-1">{recentUploads.length}</div>
           <div className="text-sm text-[#9CA3AF]">Uploads Today</div>
         </div>
 
@@ -70,7 +110,7 @@ export function Cloud() {
           <div className="w-10 h-10 rounded-lg bg-[#38BDF8]/10 flex items-center justify-center mb-3">
             <Download className="w-5 h-5 text-[#38BDF8]" />
           </div>
-          <div className="mono text-3xl font-semibold text-white mb-1">2.4 GB</div>
+          <div className="mono text-3xl font-semibold text-white mb-1">{totalUploadSize.toFixed(1)} GB</div>
           <div className="text-sm text-[#9CA3AF]">Bandwidth Used</div>
         </div>
       </div>
@@ -107,7 +147,7 @@ export function Cloud() {
                   <div className="space-y-1 text-xs text-[#9CA3AF]">
                     <div className="flex justify-between">
                       <span>Used:</span>
-                      <span className="mono text-[#38BDF8]">{region.used} TB / {region.total} TB</span>
+                      <span className="mono text-[#38BDF8]">{region.usedMemory} TB / {region.totalMemory} TB</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Files:</span>
@@ -131,13 +171,13 @@ export function Cloud() {
             </div>
             <div className="mb-3">
               <div className="flex items-baseline gap-1">
-                <span className="mono text-2xl font-semibold text-white">{region.used}</span>
-                <span className="text-sm text-[#9CA3AF]">/ {region.total} TB</span>
+                <span className="mono text-2xl font-semibold text-white">{region.usedMemory}</span>
+                <span className="text-sm text-[#9CA3AF]">/ {region.totalMemory} TB</span>
               </div>
               <div className="bg-[#1f2937] rounded-full h-2 overflow-hidden mt-2">
                 <div
                   className="h-full bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9] rounded-full"
-                  style={{ width: `${(region.used / region.total) * 100}%` }}
+                  style={{ width: `${(region.usedMemory / region.totalMemory) * 100}%` }}
                 ></div>
               </div>
             </div>
@@ -162,12 +202,12 @@ export function Cloud() {
                   <Upload className="w-5 h-5 text-[#38BDF8]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="mono text-sm text-white truncate">{upload.file}</div>
-                  <div className="text-xs text-[#9CA3AF]">{upload.time}</div>
+                  <div className="mono text-sm text-white truncate">{upload.fileName}</div>
+                  <div className="text-xs text-[#9CA3AF]">{upload.uploadedAt}</div>
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <span className="mono text-sm text-[#9CA3AF]">{upload.size}</span>
+                <span className="mono text-sm text-[#9CA3AF]">{upload.fileSize}</span>
                 {upload.status === "complete" ? (
                   <span className="text-xs text-[#10B981] px-2 py-1 bg-[#10B981]/10 rounded-full">
                     Complete

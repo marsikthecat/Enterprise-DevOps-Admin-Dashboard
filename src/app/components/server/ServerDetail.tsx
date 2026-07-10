@@ -1,10 +1,10 @@
 import { useParams, Link } from "react-router";
-import { ArrowLeft, Server, Play, Square, RefreshCw, Terminal, Package, Power, XCircle } from "lucide-react";
-import { ConfirmDialog } from "../dialogs/ConfirmDialog";
-import { ErrorDialog } from "../dialogs/ErrorDialog";
+import { ArrowLeft, Server, Square, RefreshCw, Terminal, Package, Power, XCircle } from "lucide-react";
+import { ConfirmDialog } from "../../common/dialogs/ConfirmDialog";
+import { ErrorDialog } from "../../common/dialogs/ErrorDialog";
 import { useEffect, useState } from "react";
-import { DeployContainerDialog } from "../dialogs/DeployContainerDialog";
-import { Process } from "./Processes";
+import { DeployContainerDialog } from "./dialogs/DeployContainerDialog";
+import { Process, useProcessStore } from "../../states/processCpuState";
 
 const pipelines = [
   {
@@ -46,7 +46,8 @@ export function ServerDetail() {
   const [errorOpen, setErrorOpen] = useState(false);
   const [isDeployContainerDialogOpen, setIsDeployContainerDialogOpen] = useState(false);
   const [containerList, setContainerList] = useState<ContainerInfo[]>([]);
-  const [processList, setProcessList] = useState<Process[]>([]);
+  const processStoreProcesses = useProcessStore((state) => state.processes);
+  const processList = processStoreProcesses.filter((process) => process.serverId === id);
 
   const [containerAction, setContainerAction] = useState<{
     action: "stop" | "restart" | "kill";
@@ -94,20 +95,9 @@ export function ServerDetail() {
       console.error("Failed to fetch containers", error);
     }
   }
-  const fetchProcesses = async () => {
-    try {
-      const response = await fetch(`http://localhost:3000/servers/${id}/processes`);
-      const processes = await response.json();
-      setProcessList(processes);
-    } catch (error) {
-      console.error("Failed to fetch processes", error);
-    }
-  }
-
   useEffect(() => {
     fetchContainer();
-    fetchProcesses();
-  }, [])
+  }, [id]);
 
   const deployContainer = async (containerData: Partial<ContainerInfo>) => {
     try {
