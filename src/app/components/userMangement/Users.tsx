@@ -40,6 +40,11 @@ export interface Permission {
   category: string;
 }
 
+interface RoleDialogProps {
+  isOpen: boolean;
+  selectedRole: Role | null;
+}
+
 export function Users() {
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -53,7 +58,7 @@ export function Users() {
   const [userToEdit, setUserToEdit] = useState<typeof users[0] | null>(null);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [invitedEmail, setInvitedEmail] = useState("");
-  const [roleManagementOpen, setRoleManagementOpen] = useState(false);
+  const [roleManagementOpen, setRoleManagementOpen] = useState<RoleDialogProps>({ isOpen: false, selectedRole: null });
 
   const handleDeleteClick = (userId: number) => {
     setUserToDelete(userId);
@@ -285,7 +290,7 @@ export function Users() {
                   <div className="flex items-center justify-between mb-2">
                     <span className={`text-sm px-2 py-1 rounded-full border ${colorClass}`}>{role.name}</span>
                     <button
-                      onClick={() => setRoleManagementOpen(true)}
+                      onClick={() => setRoleManagementOpen({ isOpen: true, selectedRole: role })}
                       className="text-xs text-[#38BDF8] hover:text-[#0EA5E9]">Edit</button>
                   </div>
                   <div className="text-xs text-[#9CA3AF] space-y-1">
@@ -299,7 +304,7 @@ export function Users() {
                 <div className="flex items-center justify-between mb-2">
                   <span className={`text-sm px-2 py-1 rounded-full border ${colorClass}`}>{role}</span>
                   <button 
-                    onClick={() => setRoleManagementOpen(true)}
+                    onClick={() => setRoleManagementOpen({ isOpen: true, selectedRole: null })}
                     className="text-xs text-[#38BDF8] hover:text-[#0EA5E9]">Edit</button>
                 </div>
                 <div className="text-xs text-[#9CA3AF] space-y-1">
@@ -309,7 +314,7 @@ export function Users() {
                 </div>
               </div>
             ))}            <button
-              onClick={() => setRoleManagementOpen(true)}
+              onClick={() => setRoleManagementOpen({ isOpen: true, selectedRole: null })}
               className="w-full p-3 bg-[#0B0F17] hover:bg-[#1a2332] rounded-lg text-left transition-colors border-2 border-dashed border-[#1f2937] hover:border-[#38BDF8]/50"
             >
               <div className="text-sm text-[#38BDF8] flex items-center gap-2">
@@ -386,9 +391,10 @@ export function Users() {
       />
 
       <RoleManagementDialog
-        isOpen={roleManagementOpen}
-        onClose={() => setRoleManagementOpen(false)}
+        isOpen={roleManagementOpen.isOpen}
+        onClose={() => setRoleManagementOpen({ isOpen: false, selectedRole: null })}
         roles={roles}
+        selectedRole={roleManagementOpen.selectedRole}
       />
     </div>
   );

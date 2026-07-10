@@ -1,29 +1,37 @@
 import { useEffect, useState } from "react";
 import { X, Shield, Plus, Trash2, Check } from "lucide-react";
 import { Permission, Role } from "../Users";
+import { permission } from "node:process";
 
 interface RoleManagementDialogProps {
   isOpen: boolean;
   onClose: () => void;
   roles: Role[];
+  selectedRole: Role | null;
 }
 
 type ManagedRole = Role & { userCount?: number };
 
 const allPermissions: Permission[] = [
-  { id: "user:create", name: "Create users", category: "User Management" },
-  { id: "user:edit", name: "Edit users", category: "User Management" },
-  { id: "user:delete", name: "Delete users", category: "User Management" },
-  { id: "role:view", name: "View roles", category: "Role Management" },
-  { id: "role:edit", name: "Edit roles", category: "Role Management" },
-  { id: "role:assign", name: "Assign roles", category: "Role Management" },
-  { id: "server:deploy", name: "Deploy servers", category: "Infrastructure" },
-  { id: "server:restart", name: "Restart servers", category: "Infrastructure" },
-  { id: "security:audit", name: "View audit logs", category: "Security" },
-  { id: "security:settings", name: "Manage security settings", category: "Security" },
+  { id: "servers.read", name: "View Servers", category: "Servers" },
+  { id: "servers.write", name: "Manage Servers", category: "Servers" },
+  { id: "servers.deploy", name: "Deploy Servers", category: "Servers" },
+  { id: "servers.delete", name: "Delete Servers", category: "Servers" },
+  { id: "containers.read", name: "View Containers", category: "Containers" },
+  { id: "containers.write", name: "Manage Containers", category: "Containers" },
+  { id: "containers.deploy", name: "Deploy Containers", category: "Containers" },
+  { id: "network.read", name: "View Network", category: "Network" },
+  { id: "network.write", name: "Configure Network", category: "Network" },
+  { id: "users.read", name: "View Users", category: "Users" },
+  { id: "users.write", name: "Manage Users", category: "Users" },
+  { id: "users.delete", name: "Delete Users", category: "Users" },
+  { id: "security.read", name: "View Security", category: "Security" },
+  { id: "security.write", name: "Manage Security", category: "Security" },
+  { id: "cloud.read", name: "View Cloud Storage", category: "Cloud" },
+  { id: "cloud.write", name: "Manage Cloud Storage", category: "Cloud" },
 ];
 
-export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles }: RoleManagementDialogProps) {
+export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, selectedRole }: RoleManagementDialogProps) {
   const [roles, setRoles] = useState<ManagedRole[]>([]);
   const [editingRole, setEditingRole] = useState<string | number | null>(null);
   const [newRoleName, setNewRoleName] = useState("");
@@ -40,10 +48,10 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles }: R
     }));
 
     setRoles(mappedRoles);
-    setEditingRole(mappedRoles[0]?.id ?? null);
+    setEditingRole(selectedRole?.id ?? mappedRoles[0]?.id ?? null);
     setIsAddingRole(false);
     setNewRoleName("");
-  }, [isOpen, initialRoles]);
+  }, [isOpen, initialRoles, selectedRole]);
 
   if (!isOpen) return null;
 
@@ -93,6 +101,17 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles }: R
     acc[perm.category].push(perm);
     return acc;
   }, {} as Record<string, Permission[]>);
+
+  const isPermissionInRole = (permission: Permission, managedRole: ManagedRole) => {
+    const permissionsOfRole = managedRole.permissions;
+    for (let i = 0; i < permissionsOfRole.length; i++) {
+      const e = permissionsOfRole[i];
+      if (e.name == permission.name) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
@@ -218,8 +237,9 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles }: R
                         </h4>
                         <div className="grid grid-cols-2 gap-2">
                           {permissions.map((permission) => {
+                            console.log(permissions)
                             const role = roles.find(r => r.id === editingRole);
-                            const isChecked = role?.permission
+                            const isChecked = isPermissionInRole(permission, role!);
                             const isDisabled = !role?.editable;
 
                             return (
