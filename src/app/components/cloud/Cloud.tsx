@@ -1,6 +1,12 @@
-import { Cloud as CloudIcon, Upload, Download, HardDrive, Globe } from "lucide-react";
+import { 
+  Cloud as CloudIcon, 
+  Upload, 
+  Download, 
+  HardDrive, 
+  Globe, } from "lucide-react";
 import { useEffect, useState } from "react";
 import { UploadBackupDialog } from "./DeployToCloudDialog";
+import { WorldMap } from "./parts/WorldMap";
 
 export interface StorageRegion {
   id: string,
@@ -115,77 +121,10 @@ export function Cloud() {
         </div>
       </div>
 
-      {/* World Map Visualization */}
+      {/* Real World Map */}
       <div className="glass-panel rounded-lg p-5">
         <h3 className="text-lg font-semibold text-white mb-4">Global Storage Distribution</h3>
-        <div className="bg-[#0B0F17] rounded-lg p-8 relative h-[400px]">
-          {/* Simple world map visualization */}
-          <svg className="w-full h-full opacity-20">
-            <rect x="10%" y="20%" width="80%" height="60%" fill="none" stroke="#38BDF8" strokeWidth="1" />
-            <circle cx="35%" cy="35%" r="3" fill="#38BDF8" opacity="0.5" />
-            <circle cx="25%" cy="40%" r="3" fill="#38BDF8" opacity="0.5" />
-            <circle cx="55%" cy="30%" r="3" fill="#38BDF8" opacity="0.5" />
-            <circle cx="75%" cy="35%" r="3" fill="#38BDF8" opacity="0.5" />
-          </svg>
-
-          {/* Region markers */}
-          {storageRegions.map((region, i) => (
-            <div
-              key={region.region}
-              className="absolute"
-              style={{
-                left: `${20 + i * 20}%`,
-                top: `${30 + (i % 2) * 20}%`,
-              }}
-            >
-              <div className="relative group">
-                <div className="w-16 h-16 rounded-full bg-[#38BDF8]/20 border-2 border-[#38BDF8] flex items-center justify-center animate-pulse cursor-pointer hover:scale-110 transition-transform">
-                  <Globe className="w-6 h-6 text-[#38BDF8]" />
-                </div>
-                <div className="absolute top-20 left-1/2 -translate-x-1/2 w-48 bg-[#111827] border border-[#38BDF8]/30 rounded-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                  <div className="text-sm font-semibold text-white mb-2">{region.region}</div>
-                  <div className="space-y-1 text-xs text-[#9CA3AF]">
-                    <div className="flex justify-between">
-                      <span>Used:</span>
-                      <span className="mono text-[#38BDF8]">{region.usedMemory} TB / {region.totalMemory} TB</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Files:</span>
-                      <span className="mono text-white">{region.files.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Storage by Region */}
-      <div className="grid grid-cols-4 gap-4">
-        {storageRegions.map((region) => (
-          <div key={region.region} className="glass-panel rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Globe className="w-4 h-4 text-[#38BDF8]" />
-              <h4 className="text-sm font-semibold text-white">{region.region}</h4>
-            </div>
-            <div className="mb-3">
-              <div className="flex items-baseline gap-1">
-                <span className="mono text-2xl font-semibold text-white">{region.usedMemory}</span>
-                <span className="text-sm text-[#9CA3AF]">/ {region.totalMemory} TB</span>
-              </div>
-              <div className="bg-[#1f2937] rounded-full h-2 overflow-hidden mt-2">
-                <div
-                  className="h-full bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9] rounded-full"
-                  style={{ width: `${(region.usedMemory / region.totalMemory) * 100}%` }}
-                ></div>
-              </div>
-            </div>
-            <div className="text-xs text-[#9CA3AF]">
-              {region.files.toLocaleString()} files stored
-            </div>
-          </div>
-        ))}
+        {WorldMap(storageRegions)}
       </div>
 
       {/* Recent Activity */}

@@ -266,6 +266,13 @@ const recentAlerts = [
     status: "pending",
   },
   {
+    severity: "critical",
+    title: "Suspected DDoS-Attack",
+    description: "Overload of request from IP 127.22.8.238",
+    time: "3 hours ago",
+    status: "investigating",
+  },
+  {
     severity: "info",
     title: "New SSH key added",
     description: "User alice@ops.dev added new SSH key",
@@ -278,6 +285,20 @@ const recentAlerts = [
     description: "High request rate from new client",
     time: "5 hours ago",
     status: "monitoring",
+  },
+  {
+    severity: "warning",
+    title: "Multiple failed login attempts",
+    description: "3 failed attempts from IP 143.0.96.189",
+    time: "2 days ago",
+    status: "resolved",
+  },
+  {
+    severity: "info",
+    title: "2FA activated",
+    description: "User carol@ops.dev enabled 2FA for her account",
+    time: "1 week ago",
+    status: "resolved",
   },
 ];
 

@@ -31,9 +31,7 @@ const securityEvents = [
 ];
 
 export function Security() {
-
   const [paywallOpen, setPaywallOpen] = useState(false)
-
   const [recentAlerts, setRecentAlerts] = useState<Alert[]>([]);
   const [vulnerabilities, setVulnerabilities] = useState<Vulnerability[]>([]);
 
@@ -44,11 +42,9 @@ export function Security() {
           fetch("http://localhost:3000/alerts"),
           fetch("http://localhost:3000/vulnerabilities"),
         ]);
-
         if (alertsResponse.ok) {
           setRecentAlerts(await alertsResponse.json());
         }
-
         if (vulnerabilitiesResponse.ok) {
           setVulnerabilities(await vulnerabilitiesResponse.json());
         }
@@ -56,7 +52,6 @@ export function Security() {
         console.error("Failed to fetch security data:", error);
       }
     };
-
     fetchSecurityData();
   }, []);
 
@@ -67,67 +62,6 @@ export function Security() {
       <div>
         <h1 className="text-3xl font-semibold text-white mb-1">Security Center</h1>
         <p className="text-[#9CA3AF]">Monitor security events and vulnerabilities</p>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
-        <div className="stat-card rounded-lg p-5">
-          <div className="w-10 h-10 rounded-lg bg-[#10B981]/10 flex items-center justify-center mb-3">
-            <CheckCircle className="w-5 h-5 text-[#10B981]" />
-          </div>
-          <div className="mono text-3xl font-semibold text-white mb-1">94</div>
-          <div className="text-sm text-[#9CA3AF]">Security Score</div>
-          <div className="mt-2">
-            <div className="bg-[#1f2937] rounded-full h-2 overflow-hidden">
-              <div className="h-full bg-[#10B981] rounded-full" style={{ width: "94%" }}></div>
-            </div>
-          </div>
-        </div>
-
-        <div className="stat-card rounded-lg p-5">
-          <div className="w-10 h-10 rounded-lg bg-[#EF4444]/10 flex items-center justify-center mb-3">
-            <AlertTriangle className="w-5 h-5 text-[#EF4444]" />
-          </div>
-          <div className="mono text-3xl font-semibold text-white mb-1">{criticalAlerts}</div>
-          <div className="text-sm text-[#9CA3AF]">Critical Alerts</div>
-        </div>
-
-        <div className="stat-card rounded-lg p-5">
-          <div className="w-10 h-10 rounded-lg bg-[#F59E0B]/10 flex items-center justify-center mb-3">
-            <Shield className="w-5 h-5 text-[#F59E0B]" />
-          </div>
-          <div className="mono text-3xl font-semibold text-white mb-1">{vulnerabilities.length}</div>
-          <div className="text-sm text-[#9CA3AF]">Vulnerabilities</div>
-        </div>
-
-        <div className="stat-card rounded-lg p-5">
-          <div className="w-10 h-10 rounded-lg bg-[#38BDF8]/10 flex items-center justify-center mb-3">
-            <Key className="w-5 h-5 text-[#38BDF8]" />
-          </div>
-          <div className="mono text-3xl font-semibold text-white mb-1">128</div>
-          <div className="text-sm text-[#9CA3AF]">Active Keys</div>
-        </div>
-      </div>
-
-      {/* Security Events Chart */}
-      <div className="glass-panel rounded-lg p-5">
-        <h3 className="text-lg font-semibold text-white mb-1">Security Events</h3>
-        <p className="text-sm text-[#9CA3AF] mb-4">Events detected in the last 24 hours</p>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={securityEvents}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-            <XAxis dataKey="time" stroke="#9CA3AF" style={{ fontSize: 12 }} />
-            <YAxis stroke="#9CA3AF" style={{ fontSize: 12 }} />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#111827",
-                border: "1px solid #38BDF8",
-                borderRadius: "8px",
-              }}
-            />
-            <Bar dataKey="events" fill="#38BDF8" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
       </div>
 
       {/* Recent Alerts */}
@@ -184,6 +118,27 @@ export function Security() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Security Events Chart */}
+      <div className="glass-panel rounded-lg p-5">
+        <h3 className="text-lg font-semibold text-white mb-1">Security Events</h3>
+        <p className="text-sm text-[#9CA3AF] mb-4">Events detected in the last 24 hours</p>
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={securityEvents}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+            <XAxis dataKey="time" stroke="#9CA3AF" style={{ fontSize: 12 }} />
+            <YAxis stroke="#9CA3AF" style={{ fontSize: 12 }} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#111827",
+                border: "1px solid #38BDF8",
+                borderRadius: "8px",
+              }}
+            />
+            <Bar dataKey="events" fill="#38BDF8" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
 
       {/* Vulnerabilities */}
