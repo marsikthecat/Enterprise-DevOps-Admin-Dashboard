@@ -18,17 +18,35 @@ const topologyNodes = [
 export function Network() {
 
   const [Throughput, setThroughput] = useState<number>(280);
+  const [latency, setLatency] = useState<number>(42);
 
   useEffect(() => {
     const interval = setInterval(() => {
-    const newThroughput = Math.floor(Math.random() * 10) - 5;
-    const temp = Throughput;
-    setThroughput(temp + newThroughput);
+      const newThroughput = Math.floor(Math.random() * 10) - 5;
+      const temp = Throughput;
+      setThroughput(temp + newThroughput);
     }, 500);
     return () => clearInterval(interval);
     }, []);
     const networkData = useNetworkStore(s => s.networkData);
     const throughtPut = useNetworkStore(s => s.networkThroughput);
+
+  useEffect(() => {
+    const latencyInterval = setInterval(() => {
+      let change = 0;
+      if (latency % 2 == 0) {
+        change += 1
+      } else if (latency > 60) {
+        change -= latency * 0.2;
+      } else if (latency < 15) {
+        change += latency * 0.1;
+      } else {
+        change += Math.floor(Math.random() * 4) - 5;
+      }
+      setLatency(latency + change);
+    }, 2000);
+    return () => clearInterval(latencyInterval);
+    }, []);
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -66,7 +84,7 @@ export function Network() {
           <div className="w-10 h-10 rounded-lg bg-[#38BDF8]/10 flex items-center justify-center mb-3">
             <Wifi className="w-5 h-5 text-[#38BDF8]" />
           </div>
-          <div className="mono text-3xl font-semibold text-white mb-1">42ms</div>
+          <div className="mono text-3xl font-semibold text-white mb-1">{latency}ms</div>
           <div className="text-sm text-[#9CA3AF]">Avg Latency</div>
         </div>
       </div>
