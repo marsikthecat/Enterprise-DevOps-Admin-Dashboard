@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { AppError } from '../app.js';
 
 const prisma = new PrismaClient();
 
@@ -16,14 +17,14 @@ export async function getUser(userId) {
       include: { role: true }
     });
     if (!user) {
-      throw new Error("User not found");
+      throw new AppError(404, "User not found");
     }
 }
 
 export async function createUser(body) {
     const { name, email, role, status, avatar } = body;
     if (!name || !email) {
-        throw new Error("Name and email are required");
+        throw new AppError(400, "Name and email are required");
     }
     const normalizedRole = typeof role === 'string' ? role : 'Developer';
     const roleRecord = await prisma.role.findUnique({ where: { name: normalizedRole } });

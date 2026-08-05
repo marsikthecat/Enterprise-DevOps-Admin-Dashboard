@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { PrismaClient } from '@prisma/client';
+import { AppError } from "../app.js";
 
 const prisma = new PrismaClient();
 
@@ -13,7 +14,7 @@ export async function getServers() {
 export async function deployServer(body) {
    const { id, type, cpu, memory, storage, region } = body;
     if (!id || !type) {
-      throw new Error('ID and type are required')
+      throw new AppError(400, 'ID and type are required');
     }
     const server = await prisma.server.create({
       data: {
@@ -39,11 +40,10 @@ export async function getContainerOfServer(serverId) {
     return containers;
 }
 
-export async function deployContainerToServer(params, body) {
-    const { id } = params;
-    const { container } = bod
+export async function deployContainerToServer(serverId, body) {
+    const { container } = body;
     const server = await prisma.server.update({
-      where: { id },
+      where: { serverId },
       data: { containers: { push: container } }
     });
     return container;
