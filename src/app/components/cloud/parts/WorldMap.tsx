@@ -13,7 +13,7 @@ import {
 } from "react-simple-maps";
 import { StorageRegion } from "../Cloud";
 
-const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+const GEO_URL = import.meta.env.VITE_GEO_URL;
 
 function getCityForRegion(region: StorageRegion) {
     let lookUp: Record<string, string> = {
