@@ -1,0 +1,24 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    env_file:
+      - .env
+    environment:
+      VITE_GEO_URL: ${VITE_GEO_URL:-https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json}
+    depends_on:
+      - backend
+    restart: unless-stopped
