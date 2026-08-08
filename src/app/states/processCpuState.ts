@@ -43,6 +43,14 @@ export const useProcessStore = create<ProcessStore>((set, get) => ({
       const current = get().processes;
       set({
         processes: current.map(p => {
+          if (p.status === 'S') {
+            return {
+              ...p,
+              cpu: 0,
+              memory: 0,
+              threads: 0,
+          };
+          }
           const r = Math.random();
 
           let cpuFluct = r > 0.6 ? 0.1 : r < 0.3 ? -0.1 : 0.2;

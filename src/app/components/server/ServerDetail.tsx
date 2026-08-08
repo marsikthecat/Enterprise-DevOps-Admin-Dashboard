@@ -4,7 +4,7 @@ import { ConfirmDialog } from "../../common/dialogs/ConfirmDialog";
 import { ErrorDialog } from "../../common/dialogs/ErrorDialog";
 import { useEffect, useState } from "react";
 import { DeployContainerDialog } from "./dialogs/DeployContainerDialog";
-import { Process, useProcessStore } from "../../states/processCpuState";
+import { useProcessStore } from "../../states/processCpuState";
 
 const pipelines = [
   {

@@ -1,8 +1,8 @@
 import { Link } from "react-router";
 import { Server, Cpu, HardDrive, Network, Clock, ChevronRight, Plus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DeployServerDialog } from "./dialogs/DeployServerDialog";
-import { useEffect } from "react";
+import { useProcessStore } from "../../states/processCpuState";
 
 export interface ServerInfo {
   id: string;
@@ -22,6 +22,8 @@ export function Servers() {
   const [isDeployDialogOpen, setIsDeployDialogOpen] = useState(false);
   const [serverList, setServerList] = useState<ServerInfo[]>([]);
 
+  const processes = useProcessStore((state) => state.processes);
+
   const fetchServers = async () => {
     try {
       const response = await fetch("http://localhost:3000/servers");
@@ -34,6 +36,29 @@ export function Servers() {
   useEffect(() => {
     fetchServers();
   }, []);
+
+  const loopThroughServers = () => {
+    const serverListClone = serverList;
+    for (let i = 0; i < serverListClone.length; i++) {
+      const server = serverListClone[i];
+      const processesOfServer = processes.filter((p) => p.serverId === server.id);
+      let correctServerCpu = 0;
+      let correctServerMemory = 0;
+      const numberOfProcesses = processesOfServer.length;
+      for (let j = 0; j < numberOfProcesses; j++) {
+        const proc = processesOfServer[j];
+        correctServerCpu += proc.cpu;
+        correctServerMemory += proc.memory;
+      }
+      server.cpu = numberOfProcesses > 0 ? Math.round(correctServerCpu / numberOfProcesses) : 0;
+      server.memory = numberOfProcesses > 0 ? Math.round(correctServerMemory / server.disk) : 0;
+    }
+    setServerList([...serverListClone]);
+  }
+
+  useEffect(() => {
+    loopThroughServers();
+  }, [processes]);
 
   const deployServer = async (serverData: Partial<ServerInfo>) => {
     try {
