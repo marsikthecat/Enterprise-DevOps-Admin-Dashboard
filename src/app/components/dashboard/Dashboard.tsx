@@ -1,4 +1,4 @@
-import { Server, Activity, Network, Database, TrendingUp, AlertTriangle } from "lucide-react";
+import { Server, Activity, Network,TrendingUp, AlertTriangle } from "lucide-react";
 import {
   LineChart,
   Line,

@@ -2,8 +2,8 @@ import {
   Cloud as CloudIcon, 
   Upload, 
   Download, 
-  HardDrive, 
-  Globe, } from "lucide-react";
+  HardDrive } from "lucide-react";
+import { ErrorDialog } from "../../common/dialogs/ErrorDialog";
 import { useEffect, useState } from "react";
 import { UploadBackupDialog } from "./DeployToCloudDialog";
 import { WorldMap } from "./parts/WorldMap";
@@ -28,6 +28,7 @@ export interface Upload {
 
 export function Cloud() {
   const [isUploadBackupDialogOpen, setIsUploadBackupDialogOpen] = useState(false);
+  const [isCloudErrorDialogOpen, setIsCloudErrorDialogOpen] = useState(false);
 
   const [storageRegions, setStorageRegion] = useState<StorageRegion[]>([]);
   const [recentUploads, setRecentUploads] = useState<Upload[]>([]);
@@ -165,8 +166,19 @@ export function Cloud() {
       
       <UploadBackupDialog
         isOpen={isUploadBackupDialogOpen}
-        onClose={() => setIsUploadBackupDialogOpen(false)}
+        onClose={() => {
+          setIsUploadBackupDialogOpen(false)
+          setIsCloudErrorDialogOpen(true)
+        }}
       />
+
+      <ErrorDialog
+        isOpen={isCloudErrorDialogOpen}
+        onClose={() => setIsCloudErrorDialogOpen(false)}
+        title="An Error Occurred while uploading the backup"
+        message="There are no clouds in the sky. Please check your internet connection and try again."
+      />
+
     </div>
   );
 }
