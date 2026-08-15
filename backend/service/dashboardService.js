@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { v4 as uuidv4 } from "uuid";
 
 const prisma = new PrismaClient();
 
@@ -31,4 +32,24 @@ export async function getPermissions() {
 
 export async function getPipelines() {
   return prisma.pipeline.findMany({ orderBy: { name: "asc" } });
+}
+
+export async function getAuditLogs() {
+  return prisma.auditLogEntry.findMany({
+    orderBy: { timeStamp: "desc" },
+  });
+}
+
+export async function addAuditLog({ action, author }) {
+  const timeStamp = new Date().toISOString();
+  const id = uuidv4();
+  const auditLog = await prisma.auditLogEntry.create({
+    data: {
+      id,
+      timeStamp,
+      action,
+      author,
+    },
+  });
+  return auditLog;
 }

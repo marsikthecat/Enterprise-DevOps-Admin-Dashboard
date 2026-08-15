@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { X, Key, AlertTriangle, Check, ShieldCheck } from "lucide-react";
+import { useAuditLog } from "../../../hooks/useAuditLog";
 
 type Phase = "confirm" | "rotate";
 
@@ -210,6 +211,7 @@ export function RotateAPIKeysDialog({ isOpen, onClose }: RotateAPIKeysDialogProp
   const [phase, setPhase] = useState<Phase>("confirm");
   const [completed, setCompleted] = useState([false, false, false]);
   const [showSuccess, setShowSuccess] = useState(false);
+  const { addAuditLog } = useAuditLog();
 
   if (!isOpen) return null;
 
@@ -222,7 +224,17 @@ export function RotateAPIKeysDialog({ isOpen, onClose }: RotateAPIKeysDialogProp
       const next = [...prev];
       next[i] = true;
       if (next.every(Boolean)) {
-        setTimeout(() => setShowSuccess(true), 550);
+        setTimeout(async () => {
+          setShowSuccess(true);
+          try {
+            await addAuditLog({
+              action: "successful key rotation",
+              author: "admin@ops.dev",
+            });
+          } catch (error) {
+            console.error("Failed to save key rotation audit log:", error);
+          }
+        }, 550);
       }
       return next;
     });

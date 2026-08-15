@@ -52,6 +52,9 @@ app.get("/roles", dashboardController.getRoles);
 app.get("/permissions", dashboardController.getPermissions);
 app.get("/pipelines", dashboardController.getPipelines);
 
+app.get("/auditLogs", dashboardController.getAuditLogs);
+app.post("/auditLogs", dashboardController.addAuditLog);
+
 const PORT = 3000;
 
 app.listen({ port: PORT }, function (err, address) {

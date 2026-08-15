@@ -146,7 +146,7 @@ const servers = [
   {
     id: "srv-db-03",
     type: "Database",
-    status: "healty",
+    status: "healthy",
     cpu: 15,
     memory: 8,
     disk: 64,
@@ -405,6 +405,15 @@ const defaultRoles = [
   }
 ];
 
+const auditLogs = [
+  {
+    id: "a48va893h98gh",
+    timeStamp: new Date().toDateString(),
+    action: "rotate keys",
+    author: "alice@ops.dev"
+  }
+]
+
 async function resetDatabase() {
   await prisma.$transaction([
     prisma.permission.deleteMany(),
@@ -496,6 +505,11 @@ async function main() {
     await prisma.vulnerability.create({
       data: vuln
     });
+  }
+  for (const auditLog of auditLogs) {
+    await prisma.auditLogEntry.create({
+      data: auditLog
+    })
   }
   console.log('Seeding complete!');
 }

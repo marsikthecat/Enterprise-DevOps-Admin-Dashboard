@@ -28,3 +28,15 @@ export async function getPermissions(request, reply) {
 export async function getPipelines(request, reply) {
   return service.getPipelines();
 }
+
+export async function getAuditLogs(request, reply) {
+  return service.getAuditLogs();
+}
+
+export async function addAuditLog(request, reply) {
+  const { action, author } = request.body;
+  if (!action || !author) {
+    throw new AppError(400, 'Action and author are required');
+  }
+  return service.addAuditLog({ action, author });
+}

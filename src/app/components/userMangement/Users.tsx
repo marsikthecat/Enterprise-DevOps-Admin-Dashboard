@@ -6,6 +6,7 @@ import { ConfirmDialog } from "../../common/dialogs/ConfirmDialog";
 import { EditUserDialog } from "./dialogs/EditUserDialog";
 import { SuccessDialog } from "../../common/dialogs/SuccessDialog";
 import { RoleManagementDialog } from "./dialogs/RoleManagementDialog";
+import { ExportAuditLogsDialog } from "./dialogs/ExportAuditLogsDialog";
 
 
 const roleColors = {
@@ -59,6 +60,7 @@ export function Users() {
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [invitedEmail, setInvitedEmail] = useState("");
   const [roleManagementOpen, setRoleManagementOpen] = useState<RoleDialogProps>({ isOpen: false, selectedRole: null });
+  const [exportAuditLogsOpen, setExportAuditLogsOpen] = useState(false);
 
   const handleDeleteClick = (userId: number) => {
     setUserToDelete(userId);
@@ -340,7 +342,10 @@ export function Users() {
               <div className="text-sm text-white mb-1">Revoke All Sessions</div>
               <div className="text-xs text-[#9CA3AF]">Force re-authentication for all users</div>
             </button>
-            <button className="w-full p-3 bg-[#0B0F17] hover:bg-[#1a2332] rounded-lg text-left transition-colors">
+            <button
+              onClick={() => setExportAuditLogsOpen(true)}
+              className="w-full p-3 bg-[#0B0F17] hover:bg-[#1a2332] rounded-lg text-left transition-colors"
+            >
               <div className="text-sm text-white mb-1">Export Audit Logs</div>
               <div className="text-xs text-[#9CA3AF]">Download security event history</div>
             </button>
@@ -395,6 +400,11 @@ export function Users() {
         onClose={() => setRoleManagementOpen({ isOpen: false, selectedRole: null })}
         roles={roles}
         selectedRole={roleManagementOpen.selectedRole}
+      />
+
+      <ExportAuditLogsDialog
+        isOpen={exportAuditLogsOpen}
+        onClose={() => setExportAuditLogsOpen(false)}
       />
     </div>
   );
