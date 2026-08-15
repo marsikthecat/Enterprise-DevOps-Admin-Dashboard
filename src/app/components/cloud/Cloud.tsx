@@ -168,13 +168,19 @@ export function Cloud() {
         isOpen={isUploadBackupDialogOpen}
         onClose={() => {
           setIsUploadBackupDialogOpen(false)
+        }}
+        onSubmit={() => {
+          setIsCloudErrorDialogOpen(false)
           setIsCloudErrorDialogOpen(true)
         }}
       />
 
       <ErrorDialog
         isOpen={isCloudErrorDialogOpen}
-        onClose={() => setIsCloudErrorDialogOpen(false)}
+        onClose={() => {
+          setIsCloudErrorDialogOpen(false)
+          setIsUploadBackupDialogOpen(false)
+        }}
         title="An Error Occurred while uploading the backup"
         message="There are no clouds in the sky. Please check your internet connection and try again."
       />

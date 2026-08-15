@@ -4,9 +4,10 @@ import { X, Upload, FileArchive, CheckCircle } from "lucide-react";
 interface UploadBackupDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  onSubmit: () => void;
 }
 
-export function UploadBackupDialog({ isOpen, onClose }: UploadBackupDialogProps) {
+export function UploadBackupDialog({ isOpen, onClose, onSubmit }: UploadBackupDialogProps) {
   const [uploadConfig, setUploadConfig] = useState({
     appName: "",
     version: "",
@@ -31,11 +32,6 @@ export function UploadBackupDialog({ isOpen, onClose }: UploadBackupDialogProps)
     e.preventDefault();
     setIsDragging(false);
     setSelectedFile("app-backup-2026-05-24.tar.gz");
-  };
-
-  const handleUpload = () => {
-    console.log("Uploading backup:", { ...uploadConfig, file: selectedFile });
-    onClose();
   };
 
   return (
@@ -202,7 +198,7 @@ export function UploadBackupDialog({ isOpen, onClose }: UploadBackupDialogProps)
             Cancel
           </button>
           <button
-            onClick={handleUpload}
+            onClick={onSubmit}
             disabled={!selectedFile}
             className={`px-4 py-2 rounded-lg transition-colors ${
               selectedFile

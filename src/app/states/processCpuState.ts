@@ -40,6 +40,7 @@ export const useProcessStore = create<ProcessStore>((set, get) => ({
 
     setInterval(() => {
       seconds++;
+      if (seconds > 60) seconds = 0;
       const current = get().processes;
       set({
         processes: current.map(p => {
@@ -53,22 +54,21 @@ export const useProcessStore = create<ProcessStore>((set, get) => ({
           }
           const r = Math.random();
 
-          let cpuFluct = r > 0.6 ? 0.1 : r < 0.3 ? -0.1 : 0.2;
+          let cpuFluct = r > 0.5 ? 0.1 : r < 0.3 ? -0.3 : 0.2;
           let memoryFluct = 0;
           let threadFluct = 0;
 
-          if (seconds % 60 === 0) {
-            memoryFluct = cpuFluct * 10;
+          if (seconds % 10 === 0) {
+            memoryFluct += r > 0.5 ? 0.05 : -0.05;
           }
-          if (seconds % 180 === 0) {
-            threadFluct = -cpuFluct * 10;
+          if (seconds % 30 === 0) {
+            threadFluct += r > 0.5 ? 1 : -1;
           }
-
           return {
             ...p,
             cpu: Number((p.cpu + cpuFluct).toFixed(1)),
-            memory: Math.max(0, p.memory + memoryFluct),
-            threads: Math.max(1, Math.round(p.threads + threadFluct)),
+            memory: Number(Math.max(0, p.memory + memoryFluct).toFixed(2)),
+            threads: Math.max(1, p.threads + threadFluct),
           };
         }),
       });

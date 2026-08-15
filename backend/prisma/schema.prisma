@@ -44,8 +44,6 @@ model Container {
   image     String
   status    String
   ports     String
-  cpu       Int
-  memory    Int
   serverId  String
   server    Server @relation(fields: [serverId], references: [id])
   createdAt DateTime @default(now())
@@ -115,6 +113,7 @@ model RecentUpload {
   fileName   String @unique
   fileSize   Float
   uploadedAt String
+  uploadedBy String
   status     String
 }
 
@@ -134,4 +133,11 @@ model Vulnerability {
   severity    String
   cve         String
   serverCount Int
+}
+
+model AuditLogEntry {
+  id          String @id @default(uuid())
+  timeStamp   String @unique
+  action      String
+  author      String
 }

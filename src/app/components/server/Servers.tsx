@@ -10,6 +10,7 @@ export interface ServerInfo {
   status: string;
   cpu: number;
   memory: number;
+  memoryUsage: number;
   disk: number;
   network: string;
   uptime: string;
@@ -20,45 +21,50 @@ export interface ServerInfo {
 export function Servers() {
 
   const [isDeployDialogOpen, setIsDeployDialogOpen] = useState(false);
-  const [serverList, setServerList] = useState<ServerInfo[]>([]);
+  const [serverList, setServerList] = useState<Partial<ServerInfo>[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const processes = useProcessStore((state) => state.processes);
 
   const fetchServers = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch("http://localhost:3000/servers");
       const data = await response.json();
       setServerList(data);
     } catch (error) {
       console.error("Error fetching servers:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
+
   useEffect(() => {
     fetchServers();
   }, []);
 
-  const loopThroughServers = () => {
-    const serverListClone = serverList;
-    for (let i = 0; i < serverListClone.length; i++) {
-      const server = serverListClone[i];
-      const processesOfServer = processes.filter((p) => p.serverId === server.id);
-      let correctServerCpu = 0;
-      let correctServerMemory = 0;
-      const numberOfProcesses = processesOfServer.length;
-      for (let j = 0; j < numberOfProcesses; j++) {
-        const proc = processesOfServer[j];
-        correctServerCpu += proc.cpu;
-        correctServerMemory += proc.memory;
-      }
-      server.cpu = numberOfProcesses > 0 ? Math.round(correctServerCpu / numberOfProcesses) : 0;
-      server.memory = numberOfProcesses > 0 ? Math.round(correctServerMemory / server.disk) : 0;
-    }
-    setServerList([...serverListClone]);
-  }
-
   useEffect(() => {
-    loopThroughServers();
-  }, [processes]);
+    if (!serverList.length) return;
+
+    const enrichedServers = serverList.map((server) => {
+      const processesOfServer = processes.filter((p) => p.serverId === server.id);
+      const totalCpu = processesOfServer.reduce((sum, proc) => sum + (Number(proc.cpu) || 0), 0);
+      const totalMemory = processesOfServer.reduce((sum, proc) => sum + (Number(proc.memory) || 0), 0);
+      const baseMemory = Number(server.memory ?? 0);
+      const cpu = processesOfServer.length > 0 ? Math.min(100, Math.round(totalCpu / processesOfServer.length)) : 0;
+      const memoryUsage = baseMemory > 0
+        ? Math.min(100, Math.max(0, Math.round((totalMemory / baseMemory) * 100)))
+        : 0;
+
+      return {
+        ...server,
+        cpu,
+        memoryUsage,
+      };
+    });
+
+    setServerList(enrichedServers);
+  }, [serverList.length, processes]);
 
   const deployServer = async (serverData: Partial<ServerInfo>) => {
     try {
@@ -96,8 +102,16 @@ export function Servers() {
         </button>
       </div>
 
+      {isLoading && serverList.length === 0 ? (
+        <div className="text-[#9CA3AF]">Loading servers...</div>
+      ) : null}
+
       <div className="grid grid-cols-3 gap-4">
-        {serverList.map((server) => (
+        {serverList.map((server) => {
+          const safeCpu = server.cpu ?? 0;
+          const safeMemoryUsage = server.memoryUsage ?? 0;
+
+          return (
           <Link
             key={server.id}
             to={`/servers/${server.id}`}
@@ -143,14 +157,14 @@ export function Servers() {
                     <Cpu className="w-3 h-3" />
                     CPU
                   </span>
-                  <span className="mono text-white">{server.cpu}%</span>
+                  <span className="mono text-white">{safeCpu}%</span>
                 </div>
                 <div className="bg-[#1f2937] rounded-full h-1.5 overflow-hidden">
                   <div
                     className={`h-full rounded-full ${
-                      server.cpu > 80 ? "bg-[#EF4444]" : server.cpu > 60 ? "bg-[#F59E0B]" : "bg-[#38BDF8]"
+                      safeCpu > 80 ? "bg-[#EF4444]" : safeCpu > 60 ? "bg-[#F59E0B]" : "bg-[#38BDF8]"
                     }`}
-                    style={{ width: `${server.cpu}%` }}
+                    style={{ width: `${safeCpu}%` }}
                   ></div>
                 </div>
               </div>
@@ -161,12 +175,12 @@ export function Servers() {
                     <HardDrive className="w-3 h-3" />
                     Memory
                   </span>
-                  <span className="mono text-white">{server.memory}%</span>
+                  <span className="mono text-white">{safeMemoryUsage}%</span>
                 </div>
                 <div className="bg-[#1f2937] rounded-full h-1.5 overflow-hidden">
                   <div
                     className="h-full rounded-full bg-[#10B981]"
-                    style={{ width: `${server.memory}%` }}
+                    style={{ width: `${safeMemoryUsage}%` }}
                   ></div>
                 </div>
               </div>
@@ -188,7 +202,8 @@ export function Servers() {
               </div>
             </div>
           </Link>
-        ))}
+          );
+        })}
       </div>
 
       <DeployServerDialog

@@ -130,7 +130,7 @@ export function DeployServerDialog({ isOpen, onClose, onDeploy }: DeployServerDi
             <div>
               <label className="block text-sm font-semibold text-white mb-2 flex items-center gap-2">
                 <HardDrive className="w-4 h-4 text-[#10B981]" />
-                Memory (GB)
+                Max RAM Memory (GB)
               </label>
               <select
                 value={serverConfig.memory}
@@ -139,27 +139,27 @@ export function DeployServerDialog({ isOpen, onClose, onDeploy }: DeployServerDi
               >
                 <option value="4">4 GB</option>
                 <option value="8">8 GB</option>
+                <option value="12">12 GB</option>
                 <option value="16">16 GB</option>
                 <option value="32">32 GB</option>
-                <option value="64">64 GB</option>
               </select>
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-white mb-2 flex items-center gap-2">
                 <HardDrive className="w-4 h-4 text-[#F59E0B]" />
-                Storage (GB)
+                Disk Storage (GB)
               </label>
               <select
                 value={serverConfig.storage}
                 onChange={(e) => setServerConfig({ ...serverConfig, storage: parseInt(e.target.value) })}
                 className="w-full px-4 py-2.5 bg-[#0B0F17] border border-[#1f2937] rounded-lg text-white focus:border-[#38BDF8] focus:outline-none transition-colors mono"
               >
-                <option value="50">50 GB</option>
-                <option value="100">100 GB</option>
-                <option value="250">250 GB</option>
-                <option value="500">500 GB</option>
-                <option value="1000">1 TB</option>
+                <option value="64">64 GB</option>
+                <option value="128">128 GB</option>
+                <option value="256">256 GB</option>
+                <option value="512">512 GB</option>
+                <option value="1024">1 TB</option>
               </select>
             </div>
           </div>

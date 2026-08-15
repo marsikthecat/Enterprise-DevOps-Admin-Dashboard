@@ -33,11 +33,9 @@ const pipelines = [
 
 interface ContainerInfo {
   id: string;
-  name: string;
+  image: string;
   status: string;
   ports: string;
-  cpu: number;
-  mem: number;
 }
 
 export function ServerDetail() {
@@ -188,7 +186,7 @@ export function ServerDetail() {
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <div className="mono text-sm font-semibold text-white mb-1">{container.id}</div>
-                  <div className="text-xs text-[#9CA3AF]">{container.name}</div>
+                  <div className="text-xs text-[#9CA3AF]">{container.image}</div>
                 </div>
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 rounded-full bg-[#10B981]"></div>
@@ -199,14 +197,6 @@ export function ServerDetail() {
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-[#9CA3AF]">Ports</span>
                   <span className="mono text-white">{container.ports}</span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-[#9CA3AF]">CPU</span>
-                  <span className="mono text-[#38BDF8]">{container.cpu}%</span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-[#9CA3AF]">Memory</span>
-                  <span className="mono text-[#38BDF8]">{container.mem} MB</span>
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-1">
@@ -285,7 +275,7 @@ export function ServerDetail() {
                 <th className="text-left py-3 px-4 text-sm font-semibold text-[#9CA3AF]">NAME</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-[#9CA3AF]">USER</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-[#9CA3AF]">CPU %</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-[#9CA3AF]">MEM (MB)</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-[#9CA3AF]">RAM (GB)</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-[#9CA3AF]">THREADS</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-[#9CA3AF]">STATE</th>
               </tr>
