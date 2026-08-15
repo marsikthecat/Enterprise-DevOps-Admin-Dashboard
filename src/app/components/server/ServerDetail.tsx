@@ -5,6 +5,7 @@ import { ErrorDialog } from "../../common/dialogs/ErrorDialog";
 import { useEffect, useState } from "react";
 import { DeployContainerDialog } from "./dialogs/DeployContainerDialog";
 import { useProcessStore } from "../../states/processCpuState";
+import { KillContainerDialog } from "./dialogs/KillContainerDialog";
 
 const pipelines = [
   {
@@ -45,6 +46,7 @@ export function ServerDetail() {
   const [open, setOpen] = useState(false);
   const [errorOpen, setErrorOpen] = useState(false);
   const [isDeployContainerDialogOpen, setIsDeployContainerDialogOpen] = useState(false);
+  const [killDialog, setKillDialog] = useState<{ open: boolean; name: string }>({ open: false, name: "" });
   const [containerList, setContainerList] = useState<ContainerInfo[]>([]);
   const processStoreProcesses = useProcessStore((state) => state.processes);
   const processList = processStoreProcesses.filter((process) => process.serverId === id);
@@ -59,8 +61,14 @@ export function ServerDetail() {
   };
 
   const handleConfirmAction = () => {
-    console.log(`${containerAction?.action} container:`, containerAction?.containerName);
-    setContainerAction(null);
+    if (containerAction?.action === "kill") {
+      const name = containerAction.containerName;
+      setContainerAction(null);
+      setKillDialog({ open: true, name });
+    } else {
+      console.log(`${containerAction?.action} container:`, containerAction?.containerName);
+      setContainerAction(null);
+    }
   };
 
   const getActionConfig = () => {
@@ -325,6 +333,12 @@ export function ServerDetail() {
       onConfirm={handleConfirmAction}
       {...getActionConfig()}
       confirmText={containerAction?.action === "kill" ? "Force Kill" : "Confirm"}
+    />
+
+    <KillContainerDialog
+      isOpen={killDialog.open}
+      containerName={killDialog.name}
+      onClose={() => setKillDialog({ open: false, name: "" })}
     />
     </div>
   );
