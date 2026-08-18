@@ -20,7 +20,7 @@ export function Dashboard() {
     const now = Date.now();
     return Array.from({ length: 30 }, (_, i) => ({
       time: new Date(now - (29 - i) * 1000).toLocaleTimeString(),
-      value: "10",
+      value: 58,
     }));
   });
   const avgCpu = useProcessStore(state => {
@@ -37,7 +37,7 @@ export function Dashboard() {
         ...prev.slice(1),
         {
           time: new Date().toLocaleTimeString(),
-          value: avgCpu.toFixed(1),
+          value: parseFloat(avgCpu.toFixed(1)),
         },
       ];
     });

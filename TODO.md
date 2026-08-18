@@ -4,9 +4,9 @@
 - List of env variables in container
 - 2 boxes in security inline
 - Enhance network topology (e.g. live infos, tooltips, better schematic visualisation)
+- Firewall options
 
 ## Open
-- Bug: All network traffic visualisations dont have correct timeline
 - Feat: Implement new notification tooltip on the bell
 - Feat: Logic for adding new role and changing permissions of them
 - Feat: Add confirmation dialog when deleting role
@@ -19,11 +19,10 @@
   already forgiven by [email]
 - Feat: Restart/Stop Container (consider terminating processes that are losely connected to the container using process name and  
   container image or other attribute related to the processname)
-- Fix: Global cpu-Usage: fix past values so they match current
-- Fix: global cpu-Usage: rescale y-axis for better visualisation of flucuations
-- Bug: Some images not found
 
 ## In Progress
-
+- Fix: global cpu-Usage: rescale y-axis for better visualisation of flucuations
 
 ## Done
+- Fix: Global cpu-Usage: fix past values so they match current
+- Bug: All network traffic visualisations dont have correct timeline
