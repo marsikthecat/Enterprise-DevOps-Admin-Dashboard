@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Edit } from "lucide-react";
-import { User } from "../Users";
+import type { User } from "../../../types";
 
 interface EditUserDialogProps {
   isOpen: boolean;

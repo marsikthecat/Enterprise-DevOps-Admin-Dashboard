@@ -1,15 +1,9 @@
 import { useCallback, useState } from "react";
-
-export interface AuditLogEntry {
-  id: string;
-  timeStamp: string;
-  action: string;
-  author: string;
-}
-
-const API_BASE_URL = "http://localhost:3000";
+import { useApi } from "./useApi";
+import type { AuditLogEntry } from "../types";
 
 export function useAuditLog() {
+  const api = useApi();
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -17,12 +11,7 @@ export function useAuditLog() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auditLogs`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch audit logs");
-      }
-
-      const data = await response.json();
+      const data = await api.getAuditLogs();
       setAuditLogs(Array.isArray(data) ? data : []);
       return data;
     } catch (error) {
@@ -32,31 +21,18 @@ export function useAuditLog() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [api]);
 
   const addAuditLog = useCallback(async ({ action, author }: { action: string; author: string }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/auditLogs`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ action, author }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to save audit log");
-      }
-
-      const entry = await response.json();
+      const entry = await api.addAuditLog({ action, author });
       setAuditLogs((prev) => [entry, ...prev]);
       return entry;
     } catch (error) {
       console.error("Failed to add audit log:", error);
       throw error;
     }
-  }, []);
+  }, [api]);
 
   const exportAuditLogs = useCallback((format: "csv" | "json" | "txt" = "csv") => {
     if (!auditLogs.length) return;

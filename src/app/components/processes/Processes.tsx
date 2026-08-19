@@ -2,7 +2,7 @@ import { Activity, Search, Filter } from "lucide-react";
 import { useState } from "react";
 import { X } from "lucide-react";
 import { useProcessStore } from "../../states/processCpuState";
-import { Process } from "../../states/processCpuState";
+import type { Process } from "../../types";
 
 export function Processes() {
 

@@ -7,6 +7,8 @@ import { EditUserDialog } from "./dialogs/EditUserDialog";
 import { SuccessDialog } from "../../common/dialogs/SuccessDialog";
 import { RoleManagementDialog } from "./dialogs/RoleManagementDialog";
 import { ExportAuditLogsDialog } from "./dialogs/ExportAuditLogsDialog";
+import { useApi } from "../../hooks/useApi";
+import type { Role, User } from "../../types";
 
 
 const roleColors = {
@@ -16,38 +18,13 @@ const roleColors = {
   Security: "bg-[#F59E0B]/10 text-[#F59E0B] border-[#F59E0B]/30",
 };
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: Role;
-  status: string;
-  lastLogin: string;
-  sessions: number;
-  avatar: string;
-}
-
-export interface Role {
-  id: string | number;
-  name: string;
-  category?: string;
-  permissions: Permission[];
-  editable: boolean;
-}
-
-export interface Permission {
-  id: string;
-  key?: string;
-  name: string;
-  category: string;
-}
-
 interface RoleDialogProps {
   isOpen: boolean;
   selectedRole: Role | null;
 }
 
 export function Users() {
+  const api = useApi();
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,14 +56,7 @@ export function Users() {
     if (!roleToDelete) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/roles/${roleToDelete.id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to delete role: ${response.status}`);
-      }
-
+      await api.deleteRole(roleToDelete.id);
       setRoles((currentRoles) => currentRoles.filter((role) => role.id !== roleToDelete.id));
       setRoleToDelete(null);
     } catch (error) {
@@ -95,39 +65,17 @@ export function Users() {
   };
 
   const handleCreateRole = async (name: string): Promise<Role> => {
-    const response = await fetch("http://localhost:3000/roles", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to create role: ${response.status}`);
-    }
-
-    const createdRole = await response.json();
+    const createdRole = await api.createRole(name);
     setRoles((currentRoles) => [...currentRoles, createdRole]);
     return createdRole;
   };
 
   const handleUpdateRole = async (role: Role): Promise<Role> => {
-    const response = await fetch(`http://localhost:3000/roles/${role.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        permissions: role.permissions.map((permission) => ({
-          key: permission.key ?? permission.id,
-          name: permission.name,
-          category: permission.category,
-        })),
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to update role: ${response.status}`);
-    }
-
-    const updatedRole = await response.json();
+    const updatedRole = await api.updateRole(role.id, role.permissions.map((permission) => ({
+      key: permission.key ?? permission.id,
+      name: permission.name,
+      category: permission.category,
+    })));
     setRoles((currentRoles) => currentRoles.map((currentRole) => (
       currentRole.id === updatedRole.id ? updatedRole : currentRole
     )));
@@ -159,18 +107,12 @@ export function Users() {
     const fetchUsers = async () => {
       try {
         const [usersResponse, rolesResponse] = await Promise.all([
-          fetch("http://localhost:3000/users"),
-          fetch("http://localhost:3000/roles"),
+          api.getUsers(),
+          api.getRoles(),
         ]);
 
-        if (usersResponse.ok) {
-          const usersData = await usersResponse.json();
-          setUsers(usersData);
-        }
-
-        if (rolesResponse.ok) {
-          setRoles(await rolesResponse.json());
-        }
+        setUsers(usersResponse);
+        setRoles(rolesResponse);
       } catch (error) {
         console.error("Failed to fetch users:", error);
       } finally {
@@ -179,18 +121,11 @@ export function Users() {
     };
 
     fetchUsers();
-  }, []);
+  }, [api]);
 
   const handleDeleteUser = async (userId: string) => {
     try {
-      const response = await fetch(`http://localhost:3000/users/${userId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to delete user: ${response.status}`);
-      }
-
+      await api.deleteUser(userId);
       setUsers((currentUsers) => currentUsers.filter((user) => user.id !== userId));
     } catch (error) {
       console.error("Failed to delete user:", error);

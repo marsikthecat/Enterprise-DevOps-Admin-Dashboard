@@ -1,18 +1,7 @@
 import { create } from "zustand";
+import { api } from "../hooks/useApi";
+import type { Process } from "../types";
 
-export interface Process {
-  pid: number;
-  id: string;
-  serverId: string;
-  user: string;
-  cpu: number;
-  memory: number;
-  threads: number;
-  status: string;
-  uptime: string;
-  name: string;
-  createdAt: string;
-}
 
 interface ProcessStore {
   processes: Process[];
@@ -26,8 +15,7 @@ export const useProcessStore = create<ProcessStore>((set, get) => ({
 
   fetchProcesses: async () => {
     try {
-      const res = await fetch("http://localhost:3000/processes");
-      const data = await res.json();
+      const data = await api.getProcesses();
       set({ processes: data });
     } catch (err) {
       console.error("fetch error", err);

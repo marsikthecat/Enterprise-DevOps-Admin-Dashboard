@@ -15,9 +15,10 @@
   already forgiven by [email]
 
 ## In Progress
-- Refactor: API calls in own file
+
 
 ## Done
+- Refactor: API calls and types in own file
 - Feat: Restart/Stop Container (stop puts matching processes to sleep with 0 CPU; restart returns them to a normal CPU range)
 - Feat: Generate suitable icon with AI and use it in in tab
 - Feat: Real file selector in upload to cloud dialog

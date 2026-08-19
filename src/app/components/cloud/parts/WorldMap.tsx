@@ -11,7 +11,7 @@ import {
   Marker,
   ZoomableGroup,
 } from "react-simple-maps";
-import { StorageRegion } from "../Cloud";
+import type { StorageRegion } from "../../../types";
 
 const GEO_URL = import.meta.env.VITE_GEO_URL;
 

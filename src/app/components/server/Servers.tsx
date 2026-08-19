@@ -3,6 +3,7 @@ import { Server, Cpu, HardDrive, ChevronRight, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { DeployServerDialog } from "./dialogs/DeployServerDialog";
 import { useProcessStore } from "../../states/processCpuState";
+import { useApi } from "../../hooks/useApi";
 
 export interface ServerInfo {
   id: string;
@@ -23,14 +24,14 @@ export function Servers() {
   const [isDeployDialogOpen, setIsDeployDialogOpen] = useState(false);
   const [serverList, setServerList] = useState<Partial<ServerInfo>[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const api = useApi();
 
   const processes = useProcessStore((state) => state.processes);
 
   const fetchServers = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("http://localhost:3000/servers");
-      const data = await response.json();
+      const data = await api.getServers();
       setServerList(data);
     } catch (error) {
       console.error("Error fetching servers:", error);
@@ -41,7 +42,7 @@ export function Servers() {
 
   useEffect(() => {
     fetchServers();
-  }, []);
+  }, [api]);
 
   useEffect(() => {
     if (!serverList.length) return;
@@ -68,19 +69,8 @@ export function Servers() {
 
   const deployServer = async (serverData: Partial<ServerInfo>) => {
     try {
-      const response = await fetch("http://localhost:3000/servers", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(serverData),
-      });
-      if (response.ok) {
-        const newServer = await response.json();
-        setServerList((prev) => [...prev, newServer]);
-      } else {
-        console.error("Failed to deploy server");
-      }
+      const newServer = await api.createServer(serverData as Record<string, unknown>);
+      setServerList((prev) => [...prev, newServer]);
     } catch (error) {
       console.error("Error deploying server:", error);
     }

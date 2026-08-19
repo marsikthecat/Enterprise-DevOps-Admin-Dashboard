@@ -7,56 +7,34 @@ import { ErrorDialog } from "../../common/dialogs/ErrorDialog";
 import { useEffect, useState } from "react";
 import { UploadBackupDialog } from "./DeployToCloudDialog";
 import { WorldMap } from "./parts/WorldMap";
-
-export interface StorageRegion {
-  id: string,
-  region: string,
-  totalMemory: number,
-  usedMemory: number,
-  files: number,
-  lat: number,
-  lng: number
-}
-
-export interface Upload {
-  id: string,
-  fileName: string,
-  fileSize: number,
-  uploadedAt: string,
-  status: string,
-}
+import { useApi } from "../../hooks/useApi";
+import type { FileUpload, StorageRegion } from "../../types";
 
 export function Cloud() {
+  const api = useApi();
   const [isUploadBackupDialogOpen, setIsUploadBackupDialogOpen] = useState(false);
   const [isCloudErrorDialogOpen, setIsCloudErrorDialogOpen] = useState(false);
 
   const [storageRegions, setStorageRegion] = useState<StorageRegion[]>([]);
-  const [recentUploads, setRecentUploads] = useState<Upload[]>([]);
+  const [recentUploads, setRecentUploads] = useState<FileUpload[]>([]);
 
   useEffect(() => {
     const fetchCloudData = async () => {
       try {
         const [regionsResponse, uploadsResponse] = await Promise.all([
-          fetch("http://localhost:3000/regions"),
-          fetch("http://localhost:3000/uploads"),
+          api.getRegions(),
+          api.getUploads(),
         ]);
 
-        if (regionsResponse.ok) {
-          const regions = await regionsResponse.json();
-          setStorageRegion(regions);
-        }
-
-        if (uploadsResponse.ok) {
-          const uploads = await uploadsResponse.json();
-          setRecentUploads(uploads);
-        }
+        setStorageRegion(regionsResponse);
+        setRecentUploads(uploadsResponse);
       } catch (error) {
         console.error("Failed to fetch cloud data:", error);
       }
     };
 
     fetchCloudData();
-  }, []);
+  }, [api]);
 
   const totalUsedMemory = storageRegions.reduce((sum, region) => sum + region.usedMemory, 0);
   const totalCapacity = storageRegions.reduce((sum, region) => sum + region.totalMemory, 0);

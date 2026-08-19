@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { X, Shield, Plus, Trash2, Check } from "lucide-react";
-import { Permission, Role } from "../Users";
+import type { Permission, Role } from "../../../types";
 
 interface RoleManagementDialogProps {
   isOpen: boolean;
@@ -65,7 +65,7 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, sel
         return {
           ...role,
           permissions: hasPermission
-            ? role.permissions.filter(p => p.id !== permissionId)
+            ? role.permissions.filter((permission) => (permission.key ?? permission.id) !== permissionId)
             : [...role.permissions, allPermissions.find(p => p.id === permissionId)!],
         };
       }

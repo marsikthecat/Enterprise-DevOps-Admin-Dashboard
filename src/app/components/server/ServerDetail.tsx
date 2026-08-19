@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { DeployContainerDialog } from "./dialogs/DeployContainerDialog";
 import { useProcessStore } from "../../states/processCpuState";
 import { KillContainerDialog } from "./dialogs/KillContainerDialog";
+import { useApi } from "../../hooks/useApi";
 
 const pipelines = [
   {
@@ -46,6 +47,7 @@ export function ServerDetail() {
   const [isDeployContainerDialogOpen, setIsDeployContainerDialogOpen] = useState(false);
   const [killDialog, setKillDialog] = useState<{ open: boolean; name: string }>({ open: false, name: "" });
   const [containerList, setContainerList] = useState<ContainerInfo[]>([]);
+  const api = useApi();
   const processStoreProcesses = useProcessStore((state) => state.processes);
   const applyProcessUpdates = useProcessStore((state) => state.applyProcessUpdates);
   const processList = processStoreProcesses.filter((process) => process.serverId === id);
@@ -67,18 +69,10 @@ export function ServerDetail() {
     } else {
       const action = containerAction;
       setContainerAction(null);
-      if (!action) return;
+      if (!action || action.action === "kill") return;
 
       try {
-        const response = await fetch(`http://localhost:3000/servers/${id}/containers/${action.containerName}/action`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: action.action }),
-        });
-
-        if (!response.ok) throw new Error(`Container action failed (${response.status})`);
-
-        const result = await response.json();
+        const result = await api.changeContainerState(id!, action.containerName, action.action);
         setContainerList((containers) => containers.map((container) =>
           container.id === action.containerName ? { ...container, status: result.container.status } : container
         ));
@@ -115,8 +109,7 @@ export function ServerDetail() {
 
   const fetchContainer = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/servers/${id}/containers`);
-      const containers = await response.json();
+      const containers = await api.getContainers(id!);
       setContainerList(containers); 
     } catch (error) {
       console.error("Failed to fetch containers", error);
@@ -128,19 +121,8 @@ export function ServerDetail() {
 
   const deployContainer = async (containerData: Partial<ContainerInfo>) => {
     try {
-      const response = await fetch(`http://localhost:3000/servers/${id}/containers`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(containerData),
-      });
-      if (response.ok) {
-        const newContainer = await response.json();
-        setContainerList((prev) => [...prev, newContainer]); 
-      } else {
-        console.error("Failed to deploy container");
-      }
+      const newContainer = await api.deployContainer(id!, containerData as Record<string, unknown>);
+      setContainerList((prev) => [...prev, newContainer]);
     } catch (error) {
       console.error("Error deploying container:", error);
     }

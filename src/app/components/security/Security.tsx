@@ -2,23 +2,8 @@ import { Shield, AlertTriangle, CheckCircle, Key, Lock, Activity } from "lucide-
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useEffect, useState } from "react";
 import IncidentPaywallModal from "./dialogs/PaymentWall";
-
-export interface Alert {
-  id: string;
-  title: string;
-  description: string;
-  severity: "critical" | "warning" | "info";
-  time: string;
-  status: "open" | "investigating" | "resolved";
-}
-
-export interface Vulnerability {
-  package: string;
-  version: string;
-  severity: "high" | "medium" | "low";
-  cve: string;
-  serverCount: number;
-}
+import { useApi } from "../../hooks/useApi";
+import type { Alert, Vulnerability } from "../../types";
 
 const securityEvents = [
   { time: "00:00", events: 12 },
@@ -31,6 +16,7 @@ const securityEvents = [
 ];
 
 export function Security() {
+  const api = useApi();
   const [paywallOpen, setPaywallOpen] = useState(false)
   const [recentAlerts, setRecentAlerts] = useState<Alert[]>([]);
   const [vulnerabilities, setVulnerabilities] = useState<Vulnerability[]>([]);
@@ -39,21 +25,17 @@ export function Security() {
     const fetchSecurityData = async () => {
       try {
         const [alertsResponse, vulnerabilitiesResponse] = await Promise.all([
-          fetch("http://localhost:3000/alerts"),
-          fetch("http://localhost:3000/vulnerabilities"),
+          api.getAlerts(),
+          api.getVulnerabilities(),
         ]);
-        if (alertsResponse.ok) {
-          setRecentAlerts(await alertsResponse.json());
-        }
-        if (vulnerabilitiesResponse.ok) {
-          setVulnerabilities(await vulnerabilitiesResponse.json());
-        }
+        setRecentAlerts(alertsResponse);
+        setVulnerabilities(vulnerabilitiesResponse);
       } catch (error) {
         console.error("Failed to fetch security data:", error);
       }
     };
     fetchSecurityData();
-  }, []);
+  }, [api]);
 
   const criticalAlerts = recentAlerts.filter((alert) => alert.severity === "critical").length;
 
