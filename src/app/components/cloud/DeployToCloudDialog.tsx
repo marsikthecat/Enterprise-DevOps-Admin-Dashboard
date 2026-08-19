@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { X, Upload, FileArchive, CheckCircle } from "lucide-react";
 
 interface UploadBackupDialogProps {
@@ -15,7 +15,8 @@ export function UploadBackupDialog({ isOpen, onClose, onSubmit }: UploadBackupDi
     compression: "gzip",
   });
   const [isDragging, setIsDragging] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
 
@@ -31,7 +32,18 @@ export function UploadBackupDialog({ isOpen, onClose, onSubmit }: UploadBackupDi
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    setSelectedFile("app-backup-2026-05-24.tar.gz");
+    const [file] = Array.from(e.dataTransfer.files);
+    if (file) setSelectedFile(file);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const [file] = Array.from(e.target.files ?? []);
+    if (file) setSelectedFile(file);
+    e.target.value = "";
+  };
+
+  const openFilePicker = () => {
+    fileInputRef.current?.click();
   };
 
   return (
@@ -77,10 +89,12 @@ export function UploadBackupDialog({ isOpen, onClose, onSubmit }: UploadBackupDi
                   <div className="w-16 h-16 rounded-full bg-[#10B981]/10 flex items-center justify-center mb-4">
                     <CheckCircle className="w-8 h-8 text-[#10B981]" />
                   </div>
-                  <div className="mono text-sm text-white mb-2">{selectedFile}</div>
-                  <div className="text-xs text-[#9CA3AF] mb-4">4.2 GB • Ready to upload</div>
+                  <div className="mono text-sm text-white mb-2">{selectedFile.name}</div>
+                  <div className="text-xs text-[#9CA3AF] mb-4">
+                    {(selectedFile.size / (1024 ** 3)).toFixed(2)} GB • Ready to upload
+                  </div>
                   <button
-                    onClick={() => setSelectedFile(null)}
+                    onClick={openFilePicker}
                     className="text-sm text-[#38BDF8] hover:text-[#0EA5E9]"
                   >
                     Change File
@@ -94,7 +108,7 @@ export function UploadBackupDialog({ isOpen, onClose, onSubmit }: UploadBackupDi
                   <div className="text-white mb-2">Drop your backup file here</div>
                   <div className="text-sm text-[#9CA3AF] mb-4">or click to browse</div>
                   <button
-                    onClick={() => setSelectedFile("app-backup-2026-05-24.tar.gz")}
+                    onClick={openFilePicker}
                     className="px-4 py-2 bg-[#1f2937] hover:bg-[#1a2332] text-white rounded-lg transition-colors text-sm"
                   >
                     Select File
@@ -111,6 +125,13 @@ export function UploadBackupDialog({ isOpen, onClose, onSubmit }: UploadBackupDi
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-white mb-2">Application Name</label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".tar.gz,.zip,.tar,.7z,application/gzip,application/zip,application/x-7z-compressed"
+                onChange={handleFileChange}
+                className="sr-only"
+              />
               <input
                 type="text"
                 value={uploadConfig.appName}
