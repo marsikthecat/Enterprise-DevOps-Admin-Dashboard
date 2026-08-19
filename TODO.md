@@ -9,7 +9,6 @@
 ## Open
 - Bug: Confirmation Dialog behind rolemanagement dialog
 - Fix: global cpu-Usage: rescale y-axis for better visualisation of flucuations
-
 - Feat: Implement new notification tooltip on the bell
 - Feat: Implement login/logout and signup with silly feature when password is coinsidently used by somebody else: "Password 
   [password]    
@@ -17,12 +16,11 @@
 
 ## In Progress
 - Refactor: API calls in own file
-- Feat: Generate suitable icon with AI
-- Fix: Add icon in tab
 - Feat: Restart/Stop Container (consider terminating processes that are losely connected to the container using process name and  
   container image or other attribute related to the processname)
 
 ## Done
+- Feat: Generate suitable icon with AI and use it in in tab
 - Feat: Real file selector in upload to cloud dialog
 - Feat: Implement delete user - with confirmation dialog of course
 - Feat: Logic for adding new role and changing permissions of them
