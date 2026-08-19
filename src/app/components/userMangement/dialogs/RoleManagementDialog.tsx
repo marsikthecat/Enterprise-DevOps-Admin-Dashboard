@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import { X, Shield, Plus, Trash2, Check } from "lucide-react";
-import type { Permission, Role } from "../../../types";
+import { X, Shield, Plus, Check } from "lucide-react";
+import type { Permission, Role, User } from "../../../types";
 
 interface RoleManagementDialogProps {
   isOpen: boolean;
   onClose: () => void;
   roles: Role[];
+  users: User[];
   selectedRole: Role | null;
-  onDeleteRole: (role: Role) => void;
   onCreateRole: (name: string) => Promise<Role>;
   onUpdateRole: (role: Role) => Promise<Role>;
 }
@@ -33,7 +33,7 @@ const allPermissions: Permission[] = [
   { id: "cloud.write", name: "Manage Cloud Storage", category: "Cloud" },
 ];
 
-export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, selectedRole, onDeleteRole, onCreateRole, onUpdateRole }: RoleManagementDialogProps) {
+export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, users, selectedRole, onCreateRole, onUpdateRole }: RoleManagementDialogProps) {
   const [roles, setRoles] = useState<ManagedRole[]>([]);
   const [editingRole, setEditingRole] = useState<string | number | null>(null);
   const [newRoleName, setNewRoleName] = useState("");
@@ -45,7 +45,7 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, sel
 
     const mappedRoles = initialRoles.map((role) => ({
       ...role,
-      userCount: 0,
+      userCount: users.filter((user) => user.role?.id === role.id).length,
       editable: role.editable ?? true,
       permissions: role.permissions ?? [],
     }));
@@ -54,7 +54,7 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, sel
     setEditingRole(selectedRole?.id ?? mappedRoles[0]?.id ?? null);
     setIsAddingRole(false);
     setNewRoleName("");
-  }, [isOpen, initialRoles, selectedRole]);
+  }, [isOpen, initialRoles, users, selectedRole]);
 
   if (!isOpen) return null;
 
@@ -205,19 +205,8 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, sel
                     }`}
                     onClick={() => setEditingRole(role.id)}
                   >
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="mb-2">
                       <div className="font-semibold text-white text-sm">{role.name}</div>
-                      {role.editable && editingRole === role.id && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteRole(role);
-                          }}
-                          className="p-1 hover:bg-[#EF4444]/10 rounded transition-colors"
-                        >
-                          <Trash2 className="w-3 h-3 text-[#EF4444]" />
-                        </button>
-                      )}
                     </div>
                     <div className="text-xs text-[#9CA3AF]">
                       {role.permissions.length} permissions • {role.userCount} users

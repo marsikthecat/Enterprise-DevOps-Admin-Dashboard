@@ -1,4 +1,4 @@
-import { Shield, AlertTriangle, CheckCircle, Key, Lock, Activity } from "lucide-react";
+import { Shield, AlertTriangle, Lock, Activity } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useEffect, useState } from "react";
 import IncidentPaywallModal from "./dialogs/PaymentWall";

@@ -7,17 +7,17 @@
 - Funny Firewall configuration (real wall of fire)
 
 ## Open
-- Bug: Confirmation Dialog behind rolemanagement dialog
+- Fix: Add password for users in schema + seed
 - Fix: global cpu-Usage: rescale y-axis for better visualisation of flucuations
 - Feat: Implement new notification tooltip on the bell
-- Feat: Implement login/logout and signup with silly feature when password is coinsidently used by somebody else: "Password 
-  [password]    
-  already forgiven by [email]
+- Feat: Implement login/logout and signup with silly feature when password is coinsidently used by somebody else: "Password [password] already forgiven by [email]
 
 ## In Progress
 
 
 ## Done
+- Bug: Confirmation Dialog behind rolemanagement dialog
+- Bug: Rolemanagement Dialog, roles now show assigned user counts
 - Refactor: API calls and types in own file
 - Feat: Restart/Stop Container (stop puts matching processes to sleep with 0 CPU; restart returns them to a normal CPU range)
 - Feat: Generate suitable icon with AI and use it in in tab

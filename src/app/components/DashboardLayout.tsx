@@ -11,7 +11,6 @@ import {
   Settings,
   ChevronRight,
 } from "lucide-react";
-import { useState } from "react";
 
 const navItems = [
   { path: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -24,8 +23,6 @@ const navItems = [
 ];
 
 export function DashboardLayout() {
-  const [inspectorOpen, setInspectorOpen] = useState(true);
-
   return (
     <div className="h-screen flex bg-[#0B0F17] text-[#E5E7EB] overflow-hidden">
       {/* Sidebar */}

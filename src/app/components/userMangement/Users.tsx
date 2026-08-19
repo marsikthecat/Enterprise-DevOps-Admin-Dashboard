@@ -300,9 +300,24 @@ export function Users() {
                 <div key={role.id} className="p-3 bg-[#0B0F17] rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <span className={`text-sm px-2 py-1 rounded-full border ${colorClass}`}>{role.name}</span>
-                    <button
-                      onClick={() => setRoleManagementOpen({ isOpen: true, selectedRole: role })}
-                      className="text-xs text-[#38BDF8] hover:text-[#0EA5E9]">Edit</button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setRoleManagementOpen({ isOpen: true, selectedRole: role })}
+                        className="p-1 text-[#38BDF8] hover:text-[#0EA5E9] transition-colors"
+                        aria-label={`Edit ${role.name} role`}
+                      >
+                        <Edit className="w-3.5 h-3.5" />
+                      </button>
+                      {role.editable && (
+                        <button
+                          onClick={() => handleDeleteRoleClick(role)}
+                          className="p-1 text-[#9CA3AF] hover:text-[#EF4444] transition-colors"
+                          aria-label={`Delete ${role.name} role`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="text-xs text-[#9CA3AF] space-y-1">
                     <div>• {role.permissions?.length ?? 0} permissions configured</div>
@@ -316,7 +331,11 @@ export function Users() {
                   <span className={`text-sm px-2 py-1 rounded-full border ${colorClass}`}>{role}</span>
                   <button 
                     onClick={() => setRoleManagementOpen({ isOpen: true, selectedRole: null })}
-                    className="text-xs text-[#38BDF8] hover:text-[#0EA5E9]">Edit</button>
+                    className="p-1 text-[#38BDF8] hover:text-[#0EA5E9] transition-colors"
+                    aria-label={`Edit ${role} role`}
+                  >
+                    <Edit className="w-3.5 h-3.5" />
+                  </button>
                 </div>
                 <div className="text-xs text-[#9CA3AF] space-y-1">
                   <div>• Read/Write access to servers</div>
@@ -424,8 +443,8 @@ export function Users() {
         isOpen={roleManagementOpen.isOpen}
         onClose={() => setRoleManagementOpen({ isOpen: false, selectedRole: null })}
         roles={roles}
+        users={users}
         selectedRole={roleManagementOpen.selectedRole}
-        onDeleteRole={handleDeleteRoleClick}
         onCreateRole={handleCreateRole}
         onUpdateRole={handleUpdateRole}
       />

@@ -1,8 +1,4 @@
-import { 
-  ZoomIn,
-  ZoomOut,
-  Globe,
-  RotateCcw, } from "lucide-react";
+import { Globe } from "lucide-react";
 import { useState, useRef, useCallback } from "react";
 import {
   ComposableMap,
@@ -13,10 +9,11 @@ import {
 } from "react-simple-maps";
 import type { StorageRegion } from "../../../types";
 
-const GEO_URL = import.meta.env.VITE_GEO_URL;
+const GEO_URL = (import.meta as unknown as { env?: { VITE_GEO_URL?: string } }).env?.VITE_GEO_URL
+  ?? "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
 function getCityForRegion(region: StorageRegion) {
-    let lookUp: Record<string, string> = {
+    const lookUp: Record<string, string> = {
         "US-EAST": "Ashburn, VA",
         "US-WEST": "San Jose, CA",
         "EU-CENTRAL": "Frankfurt, DE",
@@ -26,8 +23,8 @@ function getCityForRegion(region: StorageRegion) {
 }
 
 export function WorldMap(storageRegions: StorageRegion[]) {
-  const [zoom, setZoom] = useState(2.2);
-  const [center, setCenter] = useState<[number, number]>([10, 20]);
+  const zoom = 2.2;
+  const center: [number, number] = [10, 20];
   const [hovered, setHovered] = useState<string | null>(null);
   const [cardPos, setCardPos] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);

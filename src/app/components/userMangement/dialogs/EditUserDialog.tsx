@@ -24,7 +24,7 @@ export function EditUserDialog({ isOpen, onClose, onSave, user }: EditUserDialog
       setUserConfig({
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: user.role.name,
         status: user.status,
       });
     }
