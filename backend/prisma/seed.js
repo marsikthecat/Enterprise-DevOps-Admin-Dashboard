@@ -407,8 +407,7 @@ const defaultRoles = [
 
 const auditLogs = [
   {
-    id: "a48va893h98gh",
-    timeStamp: new Date().toDateString(),
+    timeStamp: new Date().toISOString(),
     action: "rotate keys",
     author: "alice@ops.dev"
   }
@@ -427,6 +426,7 @@ async function resetDatabase() {
     prisma.vulnerability.deleteMany(),
     prisma.pipeline.deleteMany(),
     prisma.alert.deleteMany(),
+    prisma.auditLogEntry.deleteMany(),
     prisma.role.deleteMany(),
   ]);
 }
