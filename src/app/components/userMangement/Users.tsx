@@ -134,8 +134,10 @@ export function Users() {
     return updatedRole;
   };
 
-  const handleDeleteConfirm = () => {
-    console.log("Deleting user:", userToDelete);
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return;
+
+    await handleDeleteUser(userToDelete);
     setUserToDelete(null);
   };
 
@@ -181,10 +183,15 @@ export function Users() {
 
   const handleDeleteUser = async (userId: string) => {
     try {
-      await fetch(`http://localhost:3000/users/${userId}`, {
+      const response = await fetch(`http://localhost:3000/users/${userId}`, {
         method: "DELETE",
       });
-      setUsers(users.filter(u => u.id !== userId));
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete user: ${response.status}`);
+      }
+
+      setUsers((currentUsers) => currentUsers.filter((user) => user.id !== userId));
     } catch (error) {
       console.error("Failed to delete user:", error);
     }
