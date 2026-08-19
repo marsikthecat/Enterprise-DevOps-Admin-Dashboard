@@ -4,15 +4,13 @@
 - List of env variables in container
 - 2 boxes in security inline
 - Enhance network topology (e.g. live infos, tooltips, better schematic visualisation)
-- Firewall options
+- Funny Firewall configuration (real wall of fire)
 
 ## Open
+- Bug: Confirmation Dialog behind rolemanagement dialog
+- Fix: global cpu-Usage: rescale y-axis for better visualisation of flucuations
+- Refactor: API calls in own file
 - Feat: Implement new notification tooltip on the bell
-- Feat: Logic for adding new role and changing permissions of them
-- Feat: Add confirmation dialog when deleting role
-- Bug: Changing role in edit-user dialog does nothing
-- Feat: Implement delete user - with confirmation dialog of course
-- Feat: Real file selector in upload to cloud dialog
 - Fix: Add icon in tab
 - Feat: Implement login/logout and signup with silly feature when password is coinsidently used by somebody else: "Password 
   [password]    
@@ -21,8 +19,12 @@
   container image or other attribute related to the processname)
 
 ## In Progress
-- Fix: global cpu-Usage: rescale y-axis for better visualisation of flucuations
+- Feat: Implement delete user - with confirmation dialog of course
+- Feat: Real file selector in upload to cloud dialog
 
 ## Done
+- Feat: Logic for adding new role and changing permissions of them
+- Bug: Changing role in edit-user dialog does nothing
+- Feat: Add confirmation dialog when deleting role
 - Fix: Global cpu-Usage: fix past values so they match current
 - Bug: All network traffic visualisations dont have correct timeline

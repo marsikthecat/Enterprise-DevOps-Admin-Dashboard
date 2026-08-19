@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { X, Shield, Plus, Trash2, Check } from "lucide-react";
 import { Permission, Role } from "../Users";
-import { permission } from "node:process";
 
 interface RoleManagementDialogProps {
   isOpen: boolean;
   onClose: () => void;
   roles: Role[];
   selectedRole: Role | null;
+  onDeleteRole: (role: Role) => void;
+  onCreateRole: (name: string) => Promise<Role>;
+  onUpdateRole: (role: Role) => Promise<Role>;
 }
 
 type ManagedRole = Role & { userCount?: number };
@@ -31,11 +33,12 @@ const allPermissions: Permission[] = [
   { id: "cloud.write", name: "Manage Cloud Storage", category: "Cloud" },
 ];
 
-export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, selectedRole }: RoleManagementDialogProps) {
+export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, selectedRole, onDeleteRole, onCreateRole, onUpdateRole }: RoleManagementDialogProps) {
   const [roles, setRoles] = useState<ManagedRole[]>([]);
   const [editingRole, setEditingRole] = useState<string | number | null>(null);
   const [newRoleName, setNewRoleName] = useState("");
   const [isAddingRole, setIsAddingRole] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -58,7 +61,7 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, sel
   const togglePermission = (roleId: string | number, permissionId: string) => {
     setRoles(roles.map(role => {
       if (role.id === roleId) {
-        const hasPermission = role.permissions.some(p => p.id === permissionId);
+        const hasPermission = role.permissions.some((permission) => (permission.key ?? permission.id) === permissionId);
         return {
           ...role,
           permissions: hasPermission
@@ -70,27 +73,36 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, sel
     }));
   };
 
-  const handleAddRole = () => {
-    if (newRoleName.trim()) {
-      const nextId = roles.length ? Math.max(...roles.map((r) => Number(r.id) || 0)) + 1 : 1;
-      const newRole = {
-        id: nextId,
-        name: newRoleName,
-        permissions: [] as Permission[],
-        userCount: 0,
-        editable: true,
-      };
-      setRoles([...roles, newRole]);
-      setNewRoleName("");
-      setIsAddingRole(false);
-      setEditingRole(newRole.id);
+  const handleSaveAndClose = async () => {
+    const role = roles.find((managedRole) => managedRole.id === editingRole);
+    if (!role) {
+      onClose();
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await onUpdateRole(role);
+      onClose();
+    } catch (error) {
+      console.error("Failed to update role permissions:", error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleDeleteRole = (roleId: string | number) => {
-    setRoles(roles.filter(role => role.id !== roleId));
-    if (editingRole === roleId) {
-      setEditingRole(null);
+  const handleAddRole = async () => {
+    const name = newRoleName.trim();
+    if (!name) return;
+
+    try {
+      const newRole = await onCreateRole(name);
+      setRoles((currentRoles) => [...currentRoles, { ...newRole, userCount: 0 }]);
+      setNewRoleName("");
+      setIsAddingRole(false);
+      setEditingRole(newRole.id);
+    } catch (error) {
+      console.error("Failed to create role:", error);
     }
   };
 
@@ -106,7 +118,7 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, sel
     const permissionsOfRole = managedRole.permissions;
     for (let i = 0; i < permissionsOfRole.length; i++) {
       const e = permissionsOfRole[i];
-      if (e.name == permission.name) {
+      if ((e.key ?? e.id) === permission.id) {
         return true;
       }
     }
@@ -199,7 +211,7 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, sel
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDeleteRole(role.id);
+                            onDeleteRole(role);
                           }}
                           className="p-1 hover:bg-[#EF4444]/10 rounded transition-colors"
                         >
@@ -237,7 +249,6 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, sel
                         </h4>
                         <div className="grid grid-cols-2 gap-2">
                           {permissions.map((permission) => {
-                            console.log(permissions)
                             const role = roles.find(r => r.id === editingRole);
                             const isChecked = isPermissionInRole(permission, role!);
                             const isDisabled = !role?.editable;
@@ -288,10 +299,11 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, sel
         {/* Footer */}
         <div className="flex items-center justify-end gap-3 p-6 border-t border-[#1f2937] bg-[#0B0F17]">
           <button
-            onClick={onClose}
+            onClick={handleSaveAndClose}
+            disabled={isSaving}
             className="px-6 py-2.5 bg-[#38BDF8] hover:bg-[#0EA5E9] text-white rounded-lg transition-colors"
           >
-            Save & Close
+            {isSaving ? "Saving..." : "Save & Close"}
           </button>
         </div>
       </div>

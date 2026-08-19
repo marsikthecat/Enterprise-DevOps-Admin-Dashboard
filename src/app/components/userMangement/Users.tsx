@@ -37,6 +37,7 @@ export interface Role {
 
 export interface Permission {
   id: string;
+  key?: string;
   name: string;
   category: string;
 }
@@ -53,7 +54,7 @@ export function Users() {
   const [isRotateKeysDialogOpen, setIsRotateKeysDialogOpen] = useState(false);
 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<number | null>(null);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
   const [editUserDialogOpen, setEditUserDialogOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState<typeof users[0] | null>(null);
@@ -61,10 +62,76 @@ export function Users() {
   const [invitedEmail, setInvitedEmail] = useState("");
   const [roleManagementOpen, setRoleManagementOpen] = useState<RoleDialogProps>({ isOpen: false, selectedRole: null });
   const [exportAuditLogsOpen, setExportAuditLogsOpen] = useState(false);
+  const [roleDeleteConfirmationOpen, setRoleDeleteConfirmationOpen] = useState(false);
+  const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
 
-  const handleDeleteClick = (userId: number) => {
+  const handleDeleteClick = (userId: string) => {
     setUserToDelete(userId);
     setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteRoleClick = (role: Role) => {
+    setRoleToDelete(role);
+    setRoleDeleteConfirmationOpen(true);
+  };
+
+  const handleDeleteRole = async () => {
+    if (!roleToDelete) return;
+
+    try {
+      const response = await fetch(`http://localhost:3000/roles/${roleToDelete.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete role: ${response.status}`);
+      }
+
+      setRoles((currentRoles) => currentRoles.filter((role) => role.id !== roleToDelete.id));
+      setRoleToDelete(null);
+    } catch (error) {
+      console.error("Failed to delete role:", error);
+    }
+  };
+
+  const handleCreateRole = async (name: string): Promise<Role> => {
+    const response = await fetch("http://localhost:3000/roles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to create role: ${response.status}`);
+    }
+
+    const createdRole = await response.json();
+    setRoles((currentRoles) => [...currentRoles, createdRole]);
+    return createdRole;
+  };
+
+  const handleUpdateRole = async (role: Role): Promise<Role> => {
+    const response = await fetch(`http://localhost:3000/roles/${role.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        permissions: role.permissions.map((permission) => ({
+          key: permission.key ?? permission.id,
+          name: permission.name,
+          category: permission.category,
+        })),
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update role: ${response.status}`);
+    }
+
+    const updatedRole = await response.json();
+    setRoles((currentRoles) => currentRoles.map((currentRole) => (
+      currentRole.id === updatedRole.id ? updatedRole : currentRole
+    )));
+    return updatedRole;
   };
 
   const handleDeleteConfirm = () => {
@@ -262,7 +329,7 @@ export function Users() {
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDeleteUser(user.id)}
+                          onClick={() => handleDeleteClick(user.id)}
                           className="p-2 hover:bg-[#1f2937] rounded transition-colors text-[#9CA3AF] hover:text-[#EF4444]"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -315,7 +382,8 @@ export function Users() {
                   {role === "Admin" && <div>• User management access</div>}
                 </div>
               </div>
-            ))}            <button
+            ))}            
+            <button
               onClick={() => setRoleManagementOpen({ isOpen: true, selectedRole: null })}
               className="w-full p-3 bg-[#0B0F17] hover:bg-[#1a2332] rounded-lg text-left transition-colors border-2 border-dashed border-[#1f2937] hover:border-[#38BDF8]/50"
             >
@@ -387,6 +455,21 @@ export function Users() {
         icon="warning"
       />
 
+      <ConfirmDialog
+        isOpen={roleDeleteConfirmationOpen}
+        onClose={() => {
+          setRoleDeleteConfirmationOpen(false);
+          setRoleToDelete(null);
+        }}
+        onConfirm={handleDeleteRole}
+        title="Delete Role"
+        message={`Are you sure you want to delete the ${roleToDelete?.name ?? "selected"} role? This action cannot be undone.`}
+        confirmText="Delete Role"
+        cancelText="Keep Role"
+        variant="danger"
+        icon="warning"
+      />
+
       <SuccessDialog
         isOpen={successDialogOpen}
         onClose={() => setSuccessDialogOpen(false)}
@@ -400,6 +483,9 @@ export function Users() {
         onClose={() => setRoleManagementOpen({ isOpen: false, selectedRole: null })}
         roles={roles}
         selectedRole={roleManagementOpen.selectedRole}
+        onDeleteRole={handleDeleteRoleClick}
+        onCreateRole={handleCreateRole}
+        onUpdateRole={handleUpdateRole}
       />
 
       <ExportAuditLogsDialog
