@@ -47,6 +47,7 @@ export function ServerDetail() {
   const [killDialog, setKillDialog] = useState<{ open: boolean; name: string }>({ open: false, name: "" });
   const [containerList, setContainerList] = useState<ContainerInfo[]>([]);
   const processStoreProcesses = useProcessStore((state) => state.processes);
+  const applyProcessUpdates = useProcessStore((state) => state.applyProcessUpdates);
   const processList = processStoreProcesses.filter((process) => process.serverId === id);
 
   const [containerAction, setContainerAction] = useState<{
@@ -58,14 +59,34 @@ export function ServerDetail() {
     setContainerAction({ action, containerName });
   };
 
-  const handleConfirmAction = () => {
+  const handleConfirmAction = async () => {
     if (containerAction?.action === "kill") {
       const name = containerAction.containerName;
       setContainerAction(null);
       setKillDialog({ open: true, name });
     } else {
-      console.log(`${containerAction?.action} container:`, containerAction?.containerName);
+      const action = containerAction;
       setContainerAction(null);
+      if (!action) return;
+
+      try {
+        const response = await fetch(`http://localhost:3000/servers/${id}/containers/${action.containerName}/action`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: action.action }),
+        });
+
+        if (!response.ok) throw new Error(`Container action failed (${response.status})`);
+
+        const result = await response.json();
+        setContainerList((containers) => containers.map((container) =>
+          container.id === action.containerName ? { ...container, status: result.container.status } : container
+        ));
+        applyProcessUpdates(result.processes);
+      } catch (error) {
+        console.error(`Failed to ${action.action} container`, error);
+        await fetchContainer();
+      }
     }
   };
 
@@ -189,8 +210,8 @@ export function ServerDetail() {
                   <div className="text-xs text-[#9CA3AF]">{container.image}</div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-[#10B981]"></div>
-                  <span className="text-xs text-[#10B981]">{container.status}</span>
+                  <div className={`w-2 h-2 rounded-full ${container.status === "running" ? "bg-[#10B981]" : "bg-[#F59E0B]"}`}></div>
+                  <span className={`text-xs ${container.status === "running" ? "text-[#10B981]" : "text-[#F59E0B]"}`}>{container.status}</span>
                 </div>
               </div>
               <div className="space-y-2 mb-3">

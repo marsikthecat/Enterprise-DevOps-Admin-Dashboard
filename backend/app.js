@@ -37,6 +37,7 @@ app.setErrorHandler((error, request, reply) => {
 app.get("/servers", serverController.getServers);
 app.post("/servers", serverController.deployServer);
 app.get("/servers/:id/containers", serverController.getContainersOfServer);
+app.patch("/servers/:id/containers/:containerId/action", serverController.changeContainerState);
 app.post("/servers/:id/containers", serverController.deployContainerToServer);
 app.get("/servers/:id/processes", serverController.getProcessesOfServer);
 

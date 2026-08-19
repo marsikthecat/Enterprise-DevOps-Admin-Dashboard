@@ -14,6 +14,14 @@ export async function getContainersOfServer(request, reply) {
     return service.getContainerOfServer(request.params.id);
 }
 
+export async function changeContainerState(request, reply) {
+    return service.changeContainerState(
+        request.params.id,
+        request.params.containerId,
+        request.body?.action
+    );
+}
+
 export async function deployContainerToServer(request, reply) {
      const container = await service.deployContainerToServer(
         request.params.id,

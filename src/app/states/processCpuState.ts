@@ -17,6 +17,7 @@ export interface Process {
 interface ProcessStore {
   processes: Process[];
   fetchProcesses: () => Promise<void>;
+  applyProcessUpdates: (updates: Process[]) => void;
   startSimulation: () => void;
 }
 
@@ -31,6 +32,13 @@ export const useProcessStore = create<ProcessStore>((set, get) => ({
     } catch (err) {
       console.error("fetch error", err);
     }
+  },
+
+  applyProcessUpdates: (updates) => {
+    const updatesById = new Map(updates.map((process) => [process.id, process]));
+    set((state) => ({
+      processes: state.processes.map((process) => updatesById.get(process.id) ?? process),
+    }));
   },
 
   startSimulation: () => {
@@ -48,8 +56,6 @@ export const useProcessStore = create<ProcessStore>((set, get) => ({
             return {
               ...p,
               cpu: 0,
-              memory: 0,
-              threads: 0,
           };
           }
           const r = Math.random();

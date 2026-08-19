@@ -16,10 +16,9 @@
 
 ## In Progress
 - Refactor: API calls in own file
-- Feat: Restart/Stop Container (consider terminating processes that are losely connected to the container using process name and  
-  container image or other attribute related to the processname)
 
 ## Done
+- Feat: Restart/Stop Container (stop puts matching processes to sleep with 0 CPU; restart returns them to a normal CPU range)
 - Feat: Generate suitable icon with AI and use it in in tab
 - Feat: Real file selector in upload to cloud dialog
 - Feat: Implement delete user - with confirmation dialog of course
