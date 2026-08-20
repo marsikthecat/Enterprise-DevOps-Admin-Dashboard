@@ -1,4 +1,5 @@
 ## Ideas/to be considered
+- Improve Design in Security.tsx because there is much empty space in the entries for security alerts
 - SSH-Console feature
 - Add number of cores of server-cpu in schema - can influence number of threads
 - List of env variables in container
@@ -9,11 +10,11 @@
 - Feat: Implement login/logout and signup with silly feature when password is coinsidently used by somebody else: "Password [password] already forgiven by [email]
 
 ## In Progress
-- Fix: 2 boxes in security inline
 - Fix: Add password for users in schema + seed
-- Fix: global cpu-Usage: rescale y-axis for better visualisation of flucuations
+
 
 ## Done
+- Fix: global cpu-Usage: rescale y-axis for better visualisation of flucuations
 - Feat: Implement new notification tooltip on the bell
 - Bug: Confirmation Dialog behind rolemanagement dialog
 - Bug: Rolemanagement Dialog, roles now show assigned user counts

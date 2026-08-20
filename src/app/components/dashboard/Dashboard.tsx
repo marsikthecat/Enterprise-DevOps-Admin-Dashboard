@@ -43,6 +43,16 @@ export function Dashboard() {
     });
   }, [avgCpu]);
 
+  const cpuValues = cpuData.map((point) => point.value);
+  const cpuMinimum = Math.min(...cpuValues);
+  const cpuMaximum = Math.max(...cpuValues);
+  const cpuRange = Math.max(cpuMaximum - cpuMinimum, 5);
+  const cpuPadding = Math.max(cpuRange * 0.2, 1);
+  const cpuDomain: [number, number] = [
+    Math.max(0, cpuMinimum - cpuPadding),
+    Math.min(100, cpuMaximum + cpuPadding),
+  ];
+
   const networkData = useNetworkStore(s => s.networkData);
   const activeProcesses = useProcessStore(p => {
     return (
@@ -130,7 +140,11 @@ export function Dashboard() {
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
               <XAxis dataKey="time" stroke="#9CA3AF" style={{ fontSize: 12 }} />
-              <YAxis stroke="#9CA3AF" style={{ fontSize: 12 }} />
+              <YAxis
+                domain={cpuDomain}
+                stroke="#9CA3AF"
+                style={{ fontSize: 12 }}
+              />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "#111827",
