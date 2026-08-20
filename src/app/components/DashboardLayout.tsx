@@ -11,6 +11,17 @@ import {
   Settings,
   ChevronRight,
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "../common/ui/tooltip";
+
+const latestNews = [
+  "Production API latency is back within normal range.",
+  "Database backup completed successfully at 09:42 UTC.",
+  "3 security updates are ready for review.",
+];
 
 const navItems = [
   { path: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -69,10 +80,37 @@ export function DashboardLayout() {
         {/* Footer */}
         <div className="p-4 border-t border-[#1f2937]">
           <div className="flex items-center gap-2 mb-3">
-            <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-[#1a2332] hover:bg-[#1f2937] rounded-lg text-sm transition-colors">
-              <Bell className="w-4 h-4" />
-              <span className="mono text-[#38BDF8]">3</span>
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  aria-label="View latest news"
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-[#1a2332] hover:bg-[#1f2937] rounded-lg text-sm transition-colors"
+                >
+                  <Bell className="w-4 h-4" />
+                  <span className="mono text-[#38BDF8]">3</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                align="end"
+                sideOffset={8}
+                className="w-80 border border-[#334155] bg-[#111827] p-4 text-[#E5E7EB] shadow-xl"
+              >
+                <div className="space-y-3">
+                  <div>
+                    <div className="text-sm font-semibold text-white">Latest news</div>
+                    <div className="mt-1 text-[11px] text-[#9CA3AF]">System updates and alerts</div>
+                  </div>
+                  <div className="space-y-2">
+                    {latestNews.map((newsItem) => (
+                      <div key={newsItem} className="border-l-2 border-[#38BDF8] pl-3 text-xs leading-5 text-[#CBD5E1]">
+                        {newsItem}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </TooltipContent>
+            </Tooltip>
             <button className="flex items-center justify-center px-3 py-2 bg-[#1a2332] hover:bg-[#1f2937] rounded-lg transition-colors">
               <Settings className="w-4 h-4" />
             </button>

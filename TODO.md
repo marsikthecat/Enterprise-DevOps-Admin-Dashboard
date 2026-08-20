@@ -2,20 +2,19 @@
 - SSH-Console feature
 - Add number of cores of server-cpu in schema - can influence number of threads
 - List of env variables in container
-- 2 boxes in security inline
 - Enhance network topology (e.g. live infos, tooltips, better schematic visualisation)
 - Funny Firewall configuration (real wall of fire)
 
 ## Open
-- Fix: Add password for users in schema + seed
-- Fix: global cpu-Usage: rescale y-axis for better visualisation of flucuations
-- Feat: Implement new notification tooltip on the bell
 - Feat: Implement login/logout and signup with silly feature when password is coinsidently used by somebody else: "Password [password] already forgiven by [email]
 
 ## In Progress
-
+- Fix: 2 boxes in security inline
+- Fix: Add password for users in schema + seed
+- Fix: global cpu-Usage: rescale y-axis for better visualisation of flucuations
 
 ## Done
+- Feat: Implement new notification tooltip on the bell
 - Bug: Confirmation Dialog behind rolemanagement dialog
 - Bug: Rolemanagement Dialog, roles now show assigned user counts
 - Refactor: API calls and types in own file
