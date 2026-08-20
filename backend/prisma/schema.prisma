@@ -14,6 +14,7 @@ model User {
   id        String   @id @default(uuid())
   name      String
   email     String
+  password  String   @default("")
   roleId    String?
   role      Role?    @relation(fields: [roleId], references: [id])
   status    String

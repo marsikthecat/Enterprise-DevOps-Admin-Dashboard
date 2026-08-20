@@ -6,6 +6,7 @@ const users = [
   {
     name: "Alice Johnson",
     email: "alice@ops.dev",
+    password: "Alice123!",
     role: "Admin",
     status: "active",
     avatar: "AJ",
@@ -13,6 +14,7 @@ const users = [
   {
     name: "Bob Smith",
     email: "bob@ops.dev",
+    password: "Bob123!",
     role: "DevOps Engineer",
     status: "active",
     avatar: "BS",
@@ -20,6 +22,7 @@ const users = [
   {
     name: "Carol White",
     email: "carol@ops.dev",
+    password: "Carol123!",
     role: "Developer",
     status: "active",
     avatar: "CW",
@@ -27,6 +30,7 @@ const users = [
   {
     name: "David Lee",
     email: "david@ops.dev",
+    password: "David123!",
     role: "Security",
     status: "active",
     avatar: "DL",
@@ -34,6 +38,7 @@ const users = [
   {
     name: "Emma Davis",
     email: "emma@ops.dev",
+    password: "Emma123!",
     role: "Developer",
     status: "inactive",
     avatar: "ED",
@@ -41,6 +46,7 @@ const users = [
   {
     name: "Frank Miller",
     email: "frank@ops.dev",
+    password: "Frank123!",
     role: "DevOps Engineer",
     status: "active",
     avatar: "FM",

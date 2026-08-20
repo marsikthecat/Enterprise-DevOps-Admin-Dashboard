@@ -10,10 +10,9 @@
 - Feat: Implement login/logout and signup with silly feature when password is coinsidently used by somebody else: "Password [password] already forgiven by [email]
 
 ## In Progress
-- Fix: Add password for users in schema + seed
-
 
 ## Done
+- Fix: Add password for users in schema + seed
 - Fix: global cpu-Usage: rescale y-axis for better visualisation of flucuations
 - Feat: Implement new notification tooltip on the bell
 - Bug: Confirmation Dialog behind rolemanagement dialog
