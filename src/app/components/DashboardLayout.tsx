@@ -1,4 +1,5 @@
-import { Outlet, NavLink } from "react-router";
+import { useEffect, useState } from "react";
+import { Outlet, NavLink, useNavigate } from "react-router";
 import {
   LayoutDashboard,
   Server,
@@ -10,6 +11,7 @@ import {
   Bell,
   Settings,
   ChevronRight,
+  LogOut,
 } from "lucide-react";
 import {
   Tooltip,
@@ -34,6 +36,50 @@ const navItems = [
 ];
 
 export function DashboardLayout() {
+  const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState({
+    name: "User",
+    email: "",
+  });
+
+  useEffect(() => {
+    const readProfile = () => {
+      try {
+        const storedUser = localStorage.getItem("authUser");
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          setCurrentUser({
+            name: parsedUser?.name || "User",
+            email: parsedUser?.email || "",
+          });
+          return;
+        }
+      } catch {
+        // ignore malformed localStorage data
+      }
+
+      setCurrentUser({ name: "User", email: "" });
+    };
+
+    readProfile();
+    window.addEventListener("storage", readProfile);
+    return () => window.removeEventListener("storage", readProfile);
+  }, []);
+
+  const initials = currentUser.name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase() || "U";
+
+  const handleLogout = () => {
+    localStorage.removeItem("auth");
+    localStorage.removeItem("authUser");
+    navigate("/login");
+  };
+
   return (
     <div className="h-screen flex bg-[#0B0F17] text-[#E5E7EB] overflow-hidden">
       {/* Sidebar */}
@@ -116,13 +162,21 @@ export function DashboardLayout() {
             </button>
           </div>
           <div className="flex items-center gap-2 px-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#10B981] to-[#059669] flex items-center justify-center text-xs font-semibold text-white">
-              AD
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#10B981] to-[#059669] flex items-center justify-center text-xs font-semibold text-white flex-shrink-0">
+              {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-white truncate">Admin User</div>
-              <div className="text-xs text-[#9CA3AF]">admin@ops.dev</div>
+              <div className="text-sm font-medium text-white truncate">{currentUser.name}</div>
+              <div className="text-xs text-[#9CA3AF] truncate">{currentUser.email || "No email"}</div>
             </div>
+            <button
+              type="button"
+              aria-label="Logout"
+              onClick={handleLogout}
+              className="p-1.5 rounded-lg bg-[#1a2332] hover:bg-[#1f2937] text-[#9CA3AF] hover:text-white transition-colors flex-shrink-0"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </aside>

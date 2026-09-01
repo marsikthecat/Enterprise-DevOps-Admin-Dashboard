@@ -1,7 +1,8 @@
-const API_BASE_URL = "http://localhost:3000";
 import type { Alert, AuditLogEntry, Container, FileUpload, Permission, Process, Role, StorageRegion, User, Vulnerability } from "../types";
 
 type RequestOptions = Omit<RequestInit, "body"> & { body?: unknown };
+
+const API_BASE_URL = "http://localhost:3000";
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { body, headers, ...requestOptions } = options;
@@ -49,6 +50,14 @@ export const api = {
   getServerProcesses: (serverId: string) => request<Process[]>(`/servers/${serverId}/processes`),
 
   getUsers: () => request<User[]>("/users"),
+  signup: (payload: { name: string; email: string; password: string }) => request<User>("/auth/signup", {
+    method: "POST",
+    body: payload,
+  }),
+  login: (payload: { email: string; password: string }) => request<User>("/auth/login", {
+    method: "POST",
+    body: payload,
+  }),
   deleteUser: (userId: string) => request<void>(`/users/${userId}`, { method: "DELETE" }),
   getRoles: () => request<Role[]>("/roles"),
   createRole: (name: string) => request<Role>("/roles", {

@@ -14,6 +14,16 @@ export async function createUser(request, reply) {
     reply.code(201).send(user);
 }
 
+export async function signup(request, reply) {
+    const user = await service.signup(request.body);
+    reply.code(201).send(user);
+}
+
+export async function login(request, reply) {
+    const user = await service.loginUser(request.body);
+    reply.send(user);
+}
+
 export async function updateUser(request, reply) {
     const user = await service.updateUser(request.params.id, request.body);
     reply.send(user);

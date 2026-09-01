@@ -20,7 +20,7 @@ const app = Fastify({
 await app.register(fastifyCors, {
   origin: /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/,
   methods: ["GET", "HEAD", "POST", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type"]
+  allowedHeaders: ["Content-Type", "Authorization"]
 })
 
 app.setErrorHandler((error, request, reply) => {
@@ -46,6 +46,8 @@ app.get("/processes", processController.getProcesses);
 app.get("/users", userController.getUsers);
 app.get("/users/:id", userController.getUser);
 app.post("/users", userController.createUser);
+app.post("/auth/signup", userController.signup);
+app.post("/auth/login", userController.login);
 app.patch("/users/:id", userController.updateUser);
 app.delete("/users/:id", userController.deleteUser);
 app.post("/roles", roleController.createRole);
