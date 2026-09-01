@@ -1,16 +1,19 @@
 ## Ideas/to be considered
 - Improve Design in Security.tsx because there is much empty space in the entries for security alerts
 - Add number of cores of server-cpu in schema - can influence number of threads
-- List of env variables in container
 - Enhance network topology (e.g. live infos, tooltips, better schematic visualisation)
+- Delete user and roles only if you are admin
 
 ## Open
+- Feat: Add list of env variables on container
+- Refactor: hook for username and email
+- Bug: Remove hardcoded username in auditlog-writing
 - Feat: Funny Firewall configuration (real wall of fire)
-- Feat: Display more data about server (Cores, RAM, Disk, ...), hover on percentage shows tooltip with ...GB of ...GB used
+
 ## In Progress
 
-
 ## Done
+- Feat: Hover on percentage shows tooltip with ...GB of ...GB used
 - Feat: Implement login/logout and signup with silly feature when password is coinsidently used by somebody else: "Password [password] already forgiven by [email]
 - Fix: Add password for users in schema + seed
 - Fix: global cpu-Usage: rescale y-axis for better visualisation of flucuations

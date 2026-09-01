@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { Server, Cpu, HardDrive, ChevronRight, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { DeployServerDialog } from "./dialogs/DeployServerDialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../../common/ui/tooltip";
 import { useProcessStore } from "../../states/processCpuState";
 import { useApi } from "../../hooks/useApi";
 
@@ -100,6 +101,8 @@ export function Servers() {
         {serverList.map((server) => {
           const safeCpu = server.cpu ?? 0;
           const safeMemoryUsage = server.memoryUsage ?? 0;
+          const totalMemoryUsed = Number(server.memory ?? 0) * (safeMemoryUsage / 100);
+          const totalMemoryCapacity = Number(server.memory ?? 0);
 
           return (
           <Link
@@ -165,14 +168,28 @@ export function Servers() {
                     <HardDrive className="w-3 h-3" />
                     Memory
                   </span>
-                  <span className="mono text-white">{safeMemoryUsage}%</span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="mono text-white cursor-default">{safeMemoryUsage}%</span>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="bg-[#111827] border border-[#38BDF8]/30 text-[#E5E7EB]">
+                      <div className="text-xs font-medium">{totalMemoryUsed.toFixed(1)} GB of {totalMemoryCapacity.toFixed(1)} GB used</div>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
-                <div className="bg-[#1f2937] rounded-full h-1.5 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-[#10B981]"
-                    style={{ width: `${safeMemoryUsage}%` }}
-                  ></div>
-                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="bg-[#1f2937] rounded-full h-1.5 overflow-hidden cursor-pointer">
+                      <div
+                        className="h-full rounded-full bg-[#10B981]"
+                        style={{ width: `${safeMemoryUsage}%` }}
+                      ></div>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="bg-[#111827] border border-[#38BDF8]/30 text-[#E5E7EB]">
+                    <div className="text-xs font-medium">{totalMemoryUsed.toFixed(1)} GB of {totalMemoryCapacity.toFixed(1)} GB used</div>
+                  </TooltipContent>
+                </Tooltip>
               </div>
 
               <div className="pt-3 border-t border-[#1f2937] grid grid-cols-2 gap-2 text-xs">
