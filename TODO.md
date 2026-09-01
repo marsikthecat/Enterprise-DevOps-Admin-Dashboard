@@ -1,18 +1,22 @@
 ## Ideas/to be considered
 - Improve Design in Security.tsx because there is much empty space in the entries for security alerts
-- Add number of cores of server-cpu in schema - can influence number of threads
 - Enhance network topology (e.g. live infos, tooltips, better schematic visualisation)
-- Delete user and roles only if you are admin
+- Advanced auth with library
+- Ask Admin for permission for critical actions e.g. deleting user, changing roles etc.
+- Role should be in user-hook, good for permission-handling
 
 ## Open
-- Feat: Add list of env variables on container
-- Refactor: hook for username and email
-- Bug: Remove hardcoded username in auditlog-writing
+- Feat: Add number of cores of server-cpu in schema
+- Feat: Random number of threads for processes based on number of cores of server
 - Feat: Funny Firewall configuration (real wall of fire)
+- Feat: Add list of env variables on container
 
 ## In Progress
 
+
 ## Done
+- Refactor: hook for username and email
+- Bug: Remove hardcoded username in auditlog-writing
 - Feat: Hover on percentage shows tooltip with ...GB of ...GB used
 - Feat: Implement login/logout and signup with silly feature when password is coinsidently used by somebody else: "Password [password] already forgiven by [email]
 - Fix: Add password for users in schema + seed

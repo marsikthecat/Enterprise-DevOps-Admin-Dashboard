@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { X, CheckCircle2, Skull } from "lucide-react";
 import { useAuditLog } from "../../../hooks/useAuditLog";
+import { useCurrentUser } from "../../../hooks/useCurrentUser";
 
 const MAX_STABS = 5;
 const KNIFE_W = 124;
@@ -403,6 +404,7 @@ export function KillContainerDialog({ isOpen, containerName, onClose }: KillCont
   const [dead, setDead] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const { addAuditLog } = useAuditLog();
+  const { email: currentUserEmail } = useCurrentUser();
   const canStab = useRef(true);
   const shakeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -446,7 +448,7 @@ export function KillContainerDialog({ isOpen, containerName, onClose }: KillCont
           try {
             await addAuditLog({
               action: "killing container",
-              author: "admin@ops.dev",
+              author: currentUserEmail || "unknown",
             });
           } catch (error) {
             console.error("Failed to save kill-container audit log:", error);

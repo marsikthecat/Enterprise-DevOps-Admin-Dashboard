@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router";
 import { Server, Eye, EyeOff, Terminal, Shield, Zap, Lock } from "lucide-react";
 import { api } from "../../hooks/useApi";
+import { useCurrentUser } from "../../hooks/useCurrentUser";
 
 export function Login() {
   const navigate = useNavigate();
+  const { setCurrentUser } = useCurrentUser();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -21,10 +23,10 @@ export function Login() {
     try {
       const user = await api.login({ email, password });
       localStorage.setItem("auth", "true");
-      localStorage.setItem("authUser", JSON.stringify({
+      setCurrentUser({
         name: user.name || "User",
         email: user.email || email,
-      }));
+      });
       navigate("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed.");

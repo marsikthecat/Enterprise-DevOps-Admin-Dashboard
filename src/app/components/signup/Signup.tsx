@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router";
 import { Server, Eye, EyeOff, UserPlus, X, AlertTriangle,
      CheckCircle, Check } from "lucide-react";
 import { api } from "../../hooks/useApi";
+import { useCurrentUser } from "../../hooks/useCurrentUser";
 
 function SignupFailedDialog({
   isOpen,
@@ -122,6 +123,7 @@ function PasswordStrength({ password }: { password: string }) {
 /* ── Signup page ── */
 export function Signup() {
   const navigate = useNavigate();
+  const { setCurrentUser } = useCurrentUser();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -147,7 +149,7 @@ export function Signup() {
       setSuccess(true);
       setTimeout(() => {
         localStorage.setItem("auth", "true");
-        localStorage.setItem("authUser", JSON.stringify({ name, email }));
+        setCurrentUser({ name, email });
         navigate("/");
       }, 1400);
     } catch (err) {

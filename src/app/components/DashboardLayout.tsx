@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router";
 import {
   LayoutDashboard,
@@ -18,6 +17,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "../common/ui/tooltip";
+import { useCurrentUser } from "../hooks/useCurrentUser";
 
 const latestNews = [
   "Production API latency is back within normal range.",
@@ -37,36 +37,9 @@ const navItems = [
 
 export function DashboardLayout() {
   const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState({
-    name: "User",
-    email: "",
-  });
+  const { name, email, clearCurrentUser } = useCurrentUser();
 
-  useEffect(() => {
-    const readProfile = () => {
-      try {
-        const storedUser = localStorage.getItem("authUser");
-        if (storedUser) {
-          const parsedUser = JSON.parse(storedUser);
-          setCurrentUser({
-            name: parsedUser?.name || "User",
-            email: parsedUser?.email || "",
-          });
-          return;
-        }
-      } catch {
-        // ignore malformed localStorage data
-      }
-
-      setCurrentUser({ name: "User", email: "" });
-    };
-
-    readProfile();
-    window.addEventListener("storage", readProfile);
-    return () => window.removeEventListener("storage", readProfile);
-  }, []);
-
-  const initials = currentUser.name
+  const initials = name
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)
@@ -76,7 +49,7 @@ export function DashboardLayout() {
 
   const handleLogout = () => {
     localStorage.removeItem("auth");
-    localStorage.removeItem("authUser");
+    clearCurrentUser();
     navigate("/login");
   };
 
@@ -166,8 +139,8 @@ export function DashboardLayout() {
               {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-white truncate">{currentUser.name}</div>
-              <div className="text-xs text-[#9CA3AF] truncate">{currentUser.email || "No email"}</div>
+              <div className="text-sm font-medium text-white truncate">{name}</div>
+              <div className="text-xs text-[#9CA3AF] truncate">{email || "No email"}</div>
             </div>
             <button
               type="button"
