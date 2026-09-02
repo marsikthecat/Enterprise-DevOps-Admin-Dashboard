@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import IncidentPaywallModal from "./dialogs/PaymentWall";
 import { useApi } from "../../hooks/useApi";
 import type { Alert, Vulnerability } from "../../types";
+import { FirewallSection } from "./firewall/FirewallSection";
 
 const securityEvents = [
   { time: "00:00", events: 12 },
@@ -176,72 +177,8 @@ export function Security() {
         </div>
       </div>
 
-      {/* Security Metrics */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="glass-panel rounded-lg p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Lock className="w-4 h-4 text-[#10B981]" />
-            <h4 className="text-sm font-semibold text-white">Encryption Status</h4>
-          </div>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-[#9CA3AF]">Data at Rest</span>
-              <span className="text-[#10B981]">AES-256</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-[#9CA3AF]">Data in Transit</span>
-              <span className="text-[#10B981]">TLS 1.3</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-[#9CA3AF]">SSH Keys</span>
-              <span className="text-[#10B981]">RSA 4096</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="glass-panel rounded-lg p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Activity className="w-4 h-4 text-[#38BDF8]" />
-            <h4 className="text-sm font-semibold text-white">Access Control</h4>
-          </div>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-[#9CA3AF]">MFA Enabled</span>
-              <span className="text-[#10B981]">18 / 24</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-[#9CA3AF]">Active Sessions</span>
-              <span className="text-[#38BDF8]">42</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-[#9CA3AF]">Failed Logins</span>
-              <span className="text-[#F59E0B]">8 today</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="glass-panel rounded-lg p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Shield className="w-4 h-4 text-[#F59E0B]" />
-            <h4 className="text-sm font-semibold text-white">Firewall Rules</h4>
-          </div>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-[#9CA3AF]">Total Rules</span>
-              <span className="text-white">247</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-[#9CA3AF]">Active Rules</span>
-              <span className="text-[#10B981]">242</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-[#9CA3AF]">Blocked IPs</span>
-              <span className="text-[#EF4444]">1,428</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      <FirewallSection />
+      
       <IncidentPaywallModal open={paywallOpen} onOpenChange={(o) => {setPaywallOpen(o)}} />
     </div>
   );

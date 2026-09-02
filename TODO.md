@@ -2,19 +2,19 @@
 - Improve Design in Security.tsx because there is much empty space in the entries for security alerts
 - Enhance network topology (e.g. live infos, tooltips, better schematic visualisation)
 - Advanced auth with library
-- Ask Admin for permission for critical actions e.g. deleting user, changing roles etc.
-- Role should be in user-hook, good for permission-handling
+- Dark Mode: Everything turns black
 
 ## Open
-- Feat: Add number of cores of server-cpu in schema
-- Feat: Random number of threads for processes based on number of cores of server
-- Feat: Funny Firewall configuration (real wall of fire)
-- Feat: Add list of env variables on container
+- Ask Admin for permission for critical actions e.g. deleting user, changing roles etc.
+- Role should be in user-hook, good for permission-handling
+- When clicking on "forgot password" in sign-in, "HA HA" meme from simpsons appears
 
 ## In Progress
-
+- Fix: Remove number of cores option
+- Feat: Add list of env variables in container
 
 ## Done
+- Feat: Funny Firewall configuration (real wall of fire)
 - Refactor: hook for username and email
 - Bug: Remove hardcoded username in auditlog-writing
 - Feat: Hover on percentage shows tooltip with ...GB of ...GB used
