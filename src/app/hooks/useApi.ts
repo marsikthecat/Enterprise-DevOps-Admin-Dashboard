@@ -58,6 +58,10 @@ export const api = {
     method: "POST",
     body: payload,
   }),
+  updateUser: (userId: string, user: { name: string; email: string; role: string; status: string }) => request<User>(`/users/${userId}`, {
+    method: "PATCH",
+    body: user,
+  }),
   deleteUser: (userId: string) => request<void>(`/users/${userId}`, { method: "DELETE" }),
   getRoles: () => request<Role[]>("/roles"),
   createRole: (name: string) => request<Role>("/roles", {

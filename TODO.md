@@ -9,10 +9,10 @@
 - When clicking on "forgot password" in sign-in, "HA HA" meme from simpsons appears
 
 ## In Progress
-- Bug: Changing role of account does not change anything
 - Feat: Add list of env variables in container
 
 ## Done
+- Bug: Changing role of account does not change anything
 - Feat: Role permissions enforcement for admin
 - Fix: Remove number of cores option
 - Feat: Funny Firewall configuration (real wall of fire)

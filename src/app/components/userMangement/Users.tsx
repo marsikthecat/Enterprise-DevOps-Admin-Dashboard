@@ -4,6 +4,7 @@ import { RotateAPIKeysDialog } from "./dialogs/RotateApiKeysDialog";
 import { AddUserDialog } from "./dialogs/AddUserDialog";
 import { ConfirmDialog } from "../../common/dialogs/ConfirmDialog";
 import { EditUserDialog } from "./dialogs/EditUserDialog";
+import type { EditUserData } from "./dialogs/EditUserDialog";
 import { SuccessDialog } from "../../common/dialogs/SuccessDialog";
 import { RoleManagementDialog } from "./dialogs/RoleManagementDialog";
 import { ExportAuditLogsDialog } from "./dialogs/ExportAuditLogsDialog";
@@ -27,7 +28,7 @@ interface RoleDialogProps {
 
 export function Users() {
   const api = useApi();
-  const { role: currentUserRole } = useCurrentUser();
+  const { email: currentUserEmail, setCurrentUser, role: currentUserRole } = useCurrentUser();
   const isAdmin = currentUserRole?.toLowerCase() === "admin";
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -113,8 +114,27 @@ export function Users() {
     setSuccessDialogOpen(true);
   };
 
-  const handleEditUserSave = (userData: any) => {
-    console.log("Saving user:", userData);
+  const handleEditUserSave = async (userData: EditUserData) => {
+    try {
+      const updatedUser = await api.updateUser(userData.id, {
+        name: userData.name,
+        email: userData.email,
+        role: userData.role,
+        status: userData.status,
+      });
+      setUsers((currentUsers) => currentUsers.map((user) => (
+        user.id === updatedUser.id ? updatedUser : user
+      )));
+      if (userData.email === currentUserEmail) {
+        setCurrentUser({
+          name: updatedUser.name,
+          email: updatedUser.email,
+          role: updatedUser.role?.name,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to update user:", error);
+    }
   };
 
   useEffect(() => {

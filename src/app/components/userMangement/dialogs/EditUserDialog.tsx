@@ -5,8 +5,16 @@ import type { User } from "../../../types";
 interface EditUserDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (userData: any) => void;
+  onSave: (userData: EditUserData) => Promise<void>;
   user: User | null;
+}
+
+export interface EditUserData {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  status: string;
 }
 
 const roles = ["Admin", "DevOps Engineer", "Developer", "Security", "Viewer"];
@@ -32,8 +40,8 @@ export function EditUserDialog({ isOpen, onClose, onSave, user }: EditUserDialog
 
   if (!isOpen || !user) return null;
 
-  const handleSave = () => {
-    onSave({ ...user, ...userConfig });
+  const handleSave = async () => {
+    await onSave({ id: user.id, ...userConfig });
     onClose();
   };
 
