@@ -10,10 +10,10 @@
 - When clicking on "forgot password" in sign-in, "HA HA" meme from simpsons appears
 
 ## In Progress
-- Fix: Remove number of cores option
 - Feat: Add list of env variables in container
 
 ## Done
+- Fix: Remove number of cores option
 - Feat: Funny Firewall configuration (real wall of fire)
 - Refactor: hook for username and email
 - Bug: Remove hardcoded username in auditlog-writing

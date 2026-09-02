@@ -108,25 +108,7 @@ export function DeployServerDialog({ isOpen, onClose, onDeploy }: DeployServerDi
           </div>
 
           {/* Resources */}
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-white mb-2 flex items-center gap-2">
-                <Cpu className="w-4 h-4 text-[#38BDF8]" />
-                CPU Cores
-              </label>
-              <select
-                value={serverConfig.cpu}
-                onChange={(e) => setServerConfig({ ...serverConfig, cpu: parseInt(e.target.value) })}
-                className="w-full px-4 py-2.5 bg-[#0B0F17] border border-[#1f2937] rounded-lg text-white focus:border-[#38BDF8] focus:outline-none transition-colors mono"
-              >
-                <option value="2">2 Cores</option>
-                <option value="4">4 Cores</option>
-                <option value="8">8 Cores</option>
-                <option value="16">16 Cores</option>
-                <option value="32">32 Cores</option>
-              </select>
-            </div>
-
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-white mb-2 flex items-center gap-2">
                 <HardDrive className="w-4 h-4 text-[#10B981]" />
