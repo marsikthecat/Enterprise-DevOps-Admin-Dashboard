@@ -6,12 +6,13 @@
 - Configured Roles are not connected to the actual permissions
 
 ## Open
-- When clicking on "forgot password" in sign-in, "HA HA" meme from simpsons appears
+- Feat: Add list of env variables in container
+- Feat: When clicking on "forgot password" in sign-in, "HA HA" meme from simpsons appears
 
 ## In Progress
-- Feat: Add list of env variables in container
 
 ## Done
+- Feat: Clicking on Dashboard-Cards redirection
 - Bug: Changing role of account does not change anything
 - Feat: Role permissions enforcement for admin
 - Fix: Remove number of cores option

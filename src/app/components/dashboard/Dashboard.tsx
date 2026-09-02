@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useState, useEffect} from "react";
+import { Link } from "react-router";
 import { useNetworkStore } from "../../states/networkTrafficState";
 import { useProcessStore } from "../../states/processCpuState";
 
@@ -76,7 +77,7 @@ export function Dashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-4 gap-4">
-        <div className="stat-card rounded-lg p-5">
+        <Link to="/servers" className="stat-card rounded-lg p-5 block hover:border-[#38BDF8]/50 transition-colors">
           <div className="flex items-center justify-between mb-3">
             <div className="w-10 h-10 rounded-lg bg-[#38BDF8]/10 flex items-center justify-center">
               <Server className="w-5 h-5 text-[#38BDF8]" />
@@ -86,9 +87,9 @@ export function Dashboard() {
           <div className="mono text-3xl font-semibold text-white mb-1">24</div>
           <div className="text-sm text-[#9CA3AF]">Active Servers</div>
           <div className="mt-2 text-xs text-[#10B981]">+2 this week</div>
-        </div>
+        </Link>
 
-        <div className="stat-card rounded-lg p-5">
+        <Link to="/processes" className="stat-card rounded-lg p-5 block hover:border-[#10B981]/50 transition-colors">
           <div className="flex items-center justify-between mb-3">
             <div className="w-10 h-10 rounded-lg bg-[#10B981]/10 flex items-center justify-center">
               <Activity className="w-5 h-5 text-[#10B981]" />
@@ -98,9 +99,9 @@ export function Dashboard() {
           <div className="mono text-3xl font-semibold text-white mb-1">{activeProcesses}</div>
           <div className="text-sm text-[#9CA3AF]">Active Processes</div>
           <div className="mt-2 text-xs text-[#9CA3AF]">Across all nodes</div>
-        </div>
+        </Link>
 
-        <div className="stat-card rounded-lg p-5">
+        <Link to="/network" className="stat-card rounded-lg p-5 block hover:border-[#F59E0B]/50 transition-colors">
           <div className="flex items-center justify-between mb-3">
             <div className="w-10 h-10 rounded-lg bg-[#F59E0B]/10 flex items-center justify-center">
               <Network className="w-5 h-5 text-[#F59E0B]" />
@@ -110,9 +111,9 @@ export function Dashboard() {
           <div className="mono text-3xl font-semibold text-white mb-1">2.8 TB</div>
           <div className="text-sm text-[#9CA3AF]">Network Traffic</div>
           <div className="mt-2 text-xs text-[#9CA3AF]">Last 24 hours</div>
-        </div>
+        </Link>
 
-        <div className="stat-card rounded-lg p-5">
+        <Link to="/security" className="stat-card rounded-lg p-5 block hover:border-[#EF4444]/50 transition-colors">
           <div className="flex items-center justify-between mb-3">
             <div className="w-10 h-10 rounded-lg bg-[#EF4444]/10 flex items-center justify-center">
               <AlertTriangle className="w-5 h-5 text-[#EF4444]" />
@@ -122,7 +123,7 @@ export function Dashboard() {
           <div className="mono text-3xl font-semibold text-white mb-1">3</div>
           <div className="text-sm text-[#9CA3AF]">Active Alerts</div>
           <div className="mt-2 text-xs text-[#F59E0B]">1 critical, 2 warnings</div>
-        </div>
+        </Link>
       </div>
 
       {/* Charts Row */}
