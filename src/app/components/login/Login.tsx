@@ -26,6 +26,7 @@ export function Login() {
       setCurrentUser({
         name: user.name || "User",
         email: user.email || email,
+        role: user.role?.name,
       });
       navigate("/");
     } catch (err) {

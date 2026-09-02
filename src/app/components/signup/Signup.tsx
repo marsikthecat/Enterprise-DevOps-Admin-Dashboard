@@ -145,11 +145,11 @@ export function Signup() {
     setLoading(true);
 
     try {
-      await api.signup({ name, email, password });
+      const user = await api.signup({ name, email, password });
       setSuccess(true);
       setTimeout(() => {
         localStorage.setItem("auth", "true");
-        setCurrentUser({ name, email });
+        setCurrentUser({ name, email, role: user.role?.name });
         navigate("/");
       }, 1400);
     } catch (err) {

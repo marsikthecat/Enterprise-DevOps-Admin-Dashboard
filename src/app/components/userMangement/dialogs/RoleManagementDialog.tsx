@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { X, Shield, Plus, Check } from "lucide-react";
 import type { Permission, Role, User } from "../../../types";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../../../common/ui/tooltip";
 
 interface RoleManagementDialogProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface RoleManagementDialogProps {
   selectedRole: Role | null;
   onCreateRole: (name: string) => Promise<Role>;
   onUpdateRole: (role: Role) => Promise<Role>;
+  canManageRoles: boolean;
 }
 
 type ManagedRole = Role & { userCount?: number };
@@ -33,7 +35,7 @@ const allPermissions: Permission[] = [
   { id: "cloud.write", name: "Manage Cloud Storage", category: "Cloud" },
 ];
 
-export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, users, selectedRole, onCreateRole, onUpdateRole }: RoleManagementDialogProps) {
+export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, users, selectedRole, onCreateRole, onUpdateRole, canManageRoles }: RoleManagementDialogProps) {
   const [roles, setRoles] = useState<ManagedRole[]>([]);
   const [editingRole, setEditingRole] = useState<string | number | null>(null);
   const [newRoleName, setNewRoleName] = useState("");
@@ -74,6 +76,8 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, use
   };
 
   const handleSaveAndClose = async () => {
+    if (!canManageRoles) return;
+
     const role = roles.find((managedRole) => managedRole.id === editingRole);
     if (!role) {
       onClose();
@@ -92,6 +96,8 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, use
   };
 
   const handleAddRole = async () => {
+    if (!canManageRoles) return;
+
     const name = newRoleName.trim();
     if (!name) return;
 
@@ -154,12 +160,21 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, use
             <div className="border-r border-[#1f2937] p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-white">Roles</h3>
-                <button
-                  onClick={() => setIsAddingRole(true)}
-                  className="p-1.5 bg-[#38BDF8]/10 hover:bg-[#38BDF8]/20 rounded-lg transition-colors"
-                >
-                  <Plus className="w-4 h-4 text-[#38BDF8]" />
-                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
+                      <button
+                        onClick={() => setIsAddingRole(true)}
+                        disabled={!canManageRoles}
+                        className={`p-1.5 bg-[#38BDF8]/10 hover:bg-[#38BDF8]/20 rounded-lg transition-colors ${!canManageRoles ? "cursor-not-allowed opacity-50" : ""}`}
+                        aria-label="Add role"
+                      >
+                        <Plus className="w-4 h-4 text-[#38BDF8]" />
+                      </button>
+                    </span>
+                  </TooltipTrigger>
+                  {!canManageRoles && <TooltipContent>You need to be an admin</TooltipContent>}
+                </Tooltip>
               </div>
 
               {/* Add Role Form */}
@@ -245,13 +260,13 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, use
                             return (
                               <button
                                 key={permission.id}
-                                onClick={() => !isDisabled && togglePermission(editingRole, permission.id)}
-                                disabled={isDisabled}
+                                onClick={() => !isDisabled && canManageRoles && togglePermission(editingRole, permission.id)}
+                                disabled={isDisabled || !canManageRoles}
                                 className={`p-3 rounded-lg border-2 text-left transition-all ${
                                   isChecked
                                     ? "border-[#38BDF8] bg-[#38BDF8]/10"
                                     : "border-[#1f2937] bg-[#0B0F17] hover:border-[#38BDF8]/50"
-                                } ${isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                                } ${isDisabled || !canManageRoles ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                               >
                                 <div className="flex items-center gap-2">
                                   <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
@@ -289,7 +304,7 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, use
         <div className="flex items-center justify-end gap-3 p-6 border-t border-[#1f2937] bg-[#0B0F17]">
           <button
             onClick={handleSaveAndClose}
-            disabled={isSaving}
+            disabled={isSaving || !canManageRoles}
             className="px-6 py-2.5 bg-[#38BDF8] hover:bg-[#0EA5E9] text-white rounded-lg transition-colors"
           >
             {isSaving ? "Saving..." : "Save & Close"}

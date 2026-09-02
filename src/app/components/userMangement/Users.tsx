@@ -8,6 +8,8 @@ import { SuccessDialog } from "../../common/dialogs/SuccessDialog";
 import { RoleManagementDialog } from "./dialogs/RoleManagementDialog";
 import { ExportAuditLogsDialog } from "./dialogs/ExportAuditLogsDialog";
 import { useApi } from "../../hooks/useApi";
+import { useCurrentUser } from "../../hooks/useCurrentUser";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../../common/ui/tooltip";
 import type { Role, User } from "../../types";
 
 
@@ -25,6 +27,8 @@ interface RoleDialogProps {
 
 export function Users() {
   const api = useApi();
+  const { role: currentUserRole } = useCurrentUser();
+  const isAdmin = currentUserRole?.toLowerCase() === "admin";
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,17 +47,21 @@ export function Users() {
   const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
 
   const handleDeleteClick = (userId: string) => {
+    if (!isAdmin) return;
+
     setUserToDelete(userId);
     setDeleteConfirmOpen(true);
   };
 
   const handleDeleteRoleClick = (role: Role) => {
+    if (!isAdmin) return;
+
     setRoleToDelete(role);
     setRoleDeleteConfirmationOpen(true);
   };
 
   const handleDeleteRole = async () => {
-    if (!roleToDelete) return;
+    if (!isAdmin || !roleToDelete) return;
 
     try {
       await api.deleteRole(roleToDelete.id);
@@ -65,12 +73,16 @@ export function Users() {
   };
 
   const handleCreateRole = async (name: string): Promise<Role> => {
+    if (!isAdmin) throw new Error("You need to be an admin");
+
     const createdRole = await api.createRole(name);
     setRoles((currentRoles) => [...currentRoles, createdRole]);
     return createdRole;
   };
 
   const handleUpdateRole = async (role: Role): Promise<Role> => {
+    if (!isAdmin) throw new Error("You need to be an admin");
+
     const updatedRole = await api.updateRole(role.id, role.permissions.map((permission) => ({
       key: permission.key ?? permission.id,
       name: permission.name,
@@ -90,6 +102,8 @@ export function Users() {
   };
 
   const handleEditClick = (user: typeof users[0]) => {
+    if (!isAdmin) return;
+
     setUserToEdit(user);
     setEditUserDialogOpen(true);
   };
@@ -154,12 +168,21 @@ export function Users() {
           <h1 className="text-3xl font-semibold text-white mb-1">User Management</h1>
           <p className="text-[#9CA3AF]">Manage users, roles, and permissions</p>
         </div>
-        <button 
-          onClick={() => setAddUserDialogOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#38BDF8] hover:bg-[#0EA5E9] text-white rounded-lg transition-colors">
-          <UserPlus className="w-4 h-4" />
-          Add User
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span>
+              <button
+                onClick={() => setAddUserDialogOpen(true)}
+                disabled={!isAdmin}
+                className={`flex items-center gap-2 px-4 py-2 bg-[#38BDF8] hover:bg-[#0EA5E9] text-white rounded-lg transition-colors ${!isAdmin ? "cursor-not-allowed opacity-50" : ""}`}
+              >
+                <UserPlus className="w-4 h-4" />
+                Add User
+              </button>
+            </span>
+          </TooltipTrigger>
+          {!isAdmin && <TooltipContent>You need to be an admin</TooltipContent>}
+        </Tooltip>
       </div>
 
       {/* Stats */}
@@ -265,17 +288,36 @@ export function Users() {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center justify-end gap-2">
-                        <button 
-                          onClick={() => handleEditClick(user)}
-                          className="p-2 hover:bg-[#1f2937] rounded transition-colors text-[#9CA3AF] hover:text-[#38BDF8]">
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteClick(user.id)}
-                          className="p-2 hover:bg-[#1f2937] rounded transition-colors text-[#9CA3AF] hover:text-[#EF4444]"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <button
+                                onClick={() => handleEditClick(user)}
+                                disabled={!isAdmin}
+                                className={`p-2 hover:bg-[#1f2937] rounded transition-colors text-[#9CA3AF] hover:text-[#38BDF8] ${!isAdmin ? "cursor-not-allowed opacity-50" : ""}`}
+                                aria-label={`Edit ${user.name}`}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                            </span>
+                          </TooltipTrigger>
+                          {!isAdmin && <TooltipContent>You need to be an admin</TooltipContent>}
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <button
+                                onClick={() => handleDeleteClick(user.id)}
+                                disabled={!isAdmin}
+                                className={`p-2 hover:bg-[#1f2937] rounded transition-colors text-[#9CA3AF] hover:text-[#EF4444] ${!isAdmin ? "cursor-not-allowed opacity-50" : ""}`}
+                                aria-label={`Delete ${user.name}`}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </span>
+                          </TooltipTrigger>
+                          {!isAdmin && <TooltipContent>You need to be an admin</TooltipContent>}
+                        </Tooltip>
                       </div>
                     </td>
                   </tr>
@@ -301,21 +343,37 @@ export function Users() {
                   <div className="flex items-center justify-between mb-2">
                     <span className={`text-sm px-2 py-1 rounded-full border ${colorClass}`}>{role.name}</span>
                     <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => setRoleManagementOpen({ isOpen: true, selectedRole: role })}
-                        className="p-1 text-[#38BDF8] hover:text-[#0EA5E9] transition-colors"
-                        aria-label={`Edit ${role.name} role`}
-                      >
-                        <Edit className="w-3.5 h-3.5" />
-                      </button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <button
+                              onClick={() => setRoleManagementOpen({ isOpen: true, selectedRole: role })}
+                              disabled={!isAdmin}
+                              className={`p-1 text-[#38BDF8] hover:text-[#0EA5E9] transition-colors ${!isAdmin ? "cursor-not-allowed opacity-50" : ""}`}
+                              aria-label={`Edit ${role.name} role`}
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                            </button>
+                          </span>
+                        </TooltipTrigger>
+                        {!isAdmin && <TooltipContent>You need to be an admin</TooltipContent>}
+                      </Tooltip>
                       {role.editable && (
-                        <button
-                          onClick={() => handleDeleteRoleClick(role)}
-                          className="p-1 text-[#9CA3AF] hover:text-[#EF4444] transition-colors"
-                          aria-label={`Delete ${role.name} role`}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <button
+                                onClick={() => handleDeleteRoleClick(role)}
+                                disabled={!isAdmin}
+                                className={`p-1 text-[#9CA3AF] hover:text-[#EF4444] transition-colors ${!isAdmin ? "cursor-not-allowed opacity-50" : ""}`}
+                                aria-label={`Delete ${role.name} role`}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </span>
+                          </TooltipTrigger>
+                          {!isAdmin && <TooltipContent>You need to be an admin</TooltipContent>}
+                        </Tooltip>
                       )}
                     </div>
                   </div>
@@ -329,13 +387,21 @@ export function Users() {
               <div key={role} className="p-3 bg-[#0B0F17] rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <span className={`text-sm px-2 py-1 rounded-full border ${colorClass}`}>{role}</span>
-                  <button 
-                    onClick={() => setRoleManagementOpen({ isOpen: true, selectedRole: null })}
-                    className="p-1 text-[#38BDF8] hover:text-[#0EA5E9] transition-colors"
-                    aria-label={`Edit ${role} role`}
-                  >
-                    <Edit className="w-3.5 h-3.5" />
-                  </button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span>
+                        <button
+                          onClick={() => setRoleManagementOpen({ isOpen: true, selectedRole: null })}
+                          disabled={!isAdmin}
+                          className={`p-1 text-[#38BDF8] hover:text-[#0EA5E9] transition-colors ${!isAdmin ? "cursor-not-allowed opacity-50" : ""}`}
+                          aria-label={`Edit ${role} role`}
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                        </button>
+                      </span>
+                    </TooltipTrigger>
+                    {!isAdmin && <TooltipContent>You need to be an admin</TooltipContent>}
+                  </Tooltip>
                 </div>
                 <div className="text-xs text-[#9CA3AF] space-y-1">
                   <div>• Read/Write access to servers</div>
@@ -344,15 +410,23 @@ export function Users() {
                 </div>
               </div>
             ))}            
-            <button
-              onClick={() => setRoleManagementOpen({ isOpen: true, selectedRole: null })}
-              className="w-full p-3 bg-[#0B0F17] hover:bg-[#1a2332] rounded-lg text-left transition-colors border-2 border-dashed border-[#1f2937] hover:border-[#38BDF8]/50"
-            >
-              <div className="text-sm text-[#38BDF8] flex items-center gap-2">
-                <Shield className="w-4 h-4" />
-                Manage All Roles
-              </div>
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="block">
+                  <button
+                    onClick={() => setRoleManagementOpen({ isOpen: true, selectedRole: null })}
+                    disabled={!isAdmin}
+                    className={`w-full p-3 bg-[#0B0F17] hover:bg-[#1a2332] rounded-lg text-left transition-colors border-2 border-dashed border-[#1f2937] hover:border-[#38BDF8]/50 ${!isAdmin ? "cursor-not-allowed opacity-50" : ""}`}
+                  >
+                    <div className="text-sm text-[#38BDF8] flex items-center gap-2">
+                      <Shield className="w-4 h-4" />
+                      Manage All Roles
+                    </div>
+                  </button>
+                </span>
+              </TooltipTrigger>
+              {!isAdmin && <TooltipContent>You need to be an admin</TooltipContent>}
+            </Tooltip>
           </div>
         </div>
 
@@ -380,7 +454,7 @@ export function Users() {
             </button>
             <button className="w-full p-3 bg-[#0B0F17] hover:bg-[#1a2332] rounded-lg text-left transition-colors">
               <div className="text-sm text-white mb-1">2FA Enforcement</div>
-              <div className="text-xs text-[#9CA3AF]">Require for all admin accounts</div>
+              <div className="text-xs text-[#9CA3AF]">Require for all accounts</div>
             </button>
           </div>
         </div>
@@ -447,6 +521,7 @@ export function Users() {
         selectedRole={roleManagementOpen.selectedRole}
         onCreateRole={handleCreateRole}
         onUpdateRole={handleUpdateRole}
+        canManageRoles={isAdmin}
       />
 
       <ExportAuditLogsDialog

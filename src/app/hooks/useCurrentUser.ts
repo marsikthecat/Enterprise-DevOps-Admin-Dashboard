@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 export interface CurrentUser {
   name: string;
   email: string;
+  role?: string;
 }
 
 function readStoredUser(): CurrentUser {
@@ -14,9 +15,10 @@ function readStoredUser(): CurrentUser {
     return {
       name: parsedUser?.name || "User",
       email: parsedUser?.email || "",
+      role: parsedUser?.role,
     };
   } catch {
-    return { name: "User", email: "" };
+    return { name: "User", email: "", role: undefined };
   }
 }
 
@@ -43,7 +45,7 @@ export function useCurrentUser() {
 
   const clearCurrentUser = useCallback(() => {
     localStorage.removeItem("authUser");
-    setUser({ name: "User", email: "" });
+    setUser({ name: "User", email: "", role: undefined });
   }, []);
 
   return {
