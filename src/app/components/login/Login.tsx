@@ -1,8 +1,107 @@
-import { useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router";
-import { Server, Eye, EyeOff, Terminal, Shield, Zap, Lock } from "lucide-react";
+import { Server, Eye, EyeOff, Terminal, Shield, Zap, Lock, X } from "lucide-react";
 import { api } from "../../hooks/useApi";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
+
+function ForgotPasswordDialog({ onClose }: { onClose: () => void }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const existing = document.querySelector('script[src*="tenor.com/embed.js"]');
+    if (existing) {
+      (window as any).TNCR?.reset?.();
+      const div = containerRef.current?.querySelector(".tenor-gif-embed");
+      if (div && !(div as HTMLElement).querySelector("iframe")) {
+        const iframe = document.createElement("iframe");
+        iframe.src = "https://tenor.com/embed/24774728";
+        iframe.style.cssText = "width:100%;height:100%;border:0;border-radius:8px;";
+        iframe.allowFullscreen = true;
+        div.innerHTML = "";
+        div.appendChild(iframe);
+      }
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://tenor.com/embed.js";
+    script.async = true;
+    document.head.appendChild(script);
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)" }}
+      onClick={onClose}
+    >
+      <div
+        ref={containerRef}
+        className="relative rounded-2xl overflow-hidden"
+        style={{
+          background: "#111827",
+          border: "1px solid rgba(56,189,248,0.2)",
+          boxShadow: "0 0 0 1px rgba(56,189,248,0.1), 0 24px 64px rgba(0,0,0,0.9), 0 0 40px rgba(56,189,248,0.08)",
+          width: "min(480px, 94vw)",
+          animation: "fp-pop 0.25s cubic-bezier(0.34,1.56,0.64,1)",
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        <style>{`
+          @keyframes fp-pop {
+            from { opacity: 0; transform: scale(0.88); }
+            to   { opacity: 1; transform: scale(1); }
+          }
+        `}</style>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#1f2937]">
+          <div>
+            <div className="text-sm font-semibold text-white">Password Recovery</div>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-[#6B7280] hover:text-white hover:bg-white/10 transition-all"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* GIF */}
+        <div className="p-4" style={{ background: "#060a10" }}>
+          <div
+            className="tenor-gif-embed rounded-lg overflow-hidden"
+            data-postid="24774728"
+            data-share-method="host"
+            data-aspect-ratio="1.77778"
+            data-width="100%"
+            style={{ minHeight: 240 }}
+          >
+            <iframe
+              src="https://tenor.com/embed/24774728"
+              style={{ width: "100%", height: 240, border: 0, borderRadius: 8 }}
+              allowFullScreen
+              title="Ha Ha"
+            />
+          </div>
+        </div>
+        <div className="px-5 py-4 text-center border-t border-[#1f2937]">
+          <p className="text-sm text-[#9CA3AF]">
+            Forgot your password? <span className="text-[#38BDF8] font-medium">Ha Ha!</span>
+          </p>
+          <p className="text-xs text-[#6B7280] mt-3 mono">
+            Contact your system administrator if you need any support. Or just guess the password.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function Login() {
   const navigate = useNavigate();
@@ -12,6 +111,7 @@ export function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showForgot, setShowForgot] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +141,7 @@ export function Login() {
       className="min-h-screen bg-[#0B0F17] flex"
       style={{ fontFamily: "inherit" }}
     >
+      {showForgot && <ForgotPasswordDialog onClose={() => setShowForgot(false)} />}
       {/* Left panel — branding */}
       <div className="hidden lg:flex flex-col w-[480px] bg-[#111827] border-r border-[#1f2937] p-12 relative overflow-hidden">
         {/* Grid bg */}
@@ -145,7 +246,7 @@ export function Login() {
                 <label className="block text-xs font-medium text-[#9CA3AF] mono tracking-wider uppercase">
                   Password
                 </label>
-                <a href="#" className="text-xs text-[#38BDF8] hover:text-[#0EA5E9] transition-colors">
+                <a onClick={() => setShowForgot(true)} className="text-xs text-[#38BDF8] hover:text-[#0EA5E9] transition-colors cursor-pointer">
                   Forgot password?
                 </a>
               </div>

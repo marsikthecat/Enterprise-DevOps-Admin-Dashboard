@@ -2,16 +2,15 @@
 - Improve Design in Security.tsx because there is much empty space in the entries for security alerts
 - Enhance network topology (e.g. live infos, tooltips, better schematic visualisation)
 - Advanced auth with library
-- Dark Mode: Everything turns black
 - Configured Roles are not connected to the actual permissions
 
 ## Open
 - Feat: Add list of env variables in container
-- Feat: When clicking on "forgot password" in sign-in, "HA HA" meme from simpsons appears
 
 ## In Progress
 
 ## Done
+- Feat: When clicking on "forgot password" in sign-in, "HA HA" meme from simpsons appears
 - Feat: Clicking on Dashboard-Cards redirection
 - Bug: Changing role of account does not change anything
 - Feat: Role permissions enforcement for admin
