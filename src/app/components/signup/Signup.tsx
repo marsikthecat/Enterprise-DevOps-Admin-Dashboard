@@ -145,7 +145,8 @@ export function Signup() {
     setLoading(true);
 
     try {
-      const user = await api.signup({ name, email, password });
+      const { user, token } = await api.signup({ name, email, password });
+      localStorage.setItem("authToken", token);
       setSuccess(true);
       setTimeout(() => {
         localStorage.setItem("auth", "true");

@@ -121,7 +121,8 @@ export function Login() {
     setLoading(true);
 
     try {
-      const user = await api.login({ email, password });
+      const { user, token } = await api.login({ email, password });
+      localStorage.setItem("authToken", token);
       localStorage.setItem("auth", "true");
       setCurrentUser({
         name: user.name || "User",

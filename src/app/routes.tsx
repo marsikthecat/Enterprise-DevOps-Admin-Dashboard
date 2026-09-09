@@ -12,7 +12,7 @@ import { Login } from "./components/login/Login";
 import { Signup } from "./components/signup/Signup";
 
 function requireAuth() {
-  const authed = localStorage.getItem("auth") === "true";
+  const authed = Boolean(localStorage.getItem("authToken"));
   if (!authed) return <Navigate to="/login" replace />;
   return null;
 }

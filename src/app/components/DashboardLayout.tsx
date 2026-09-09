@@ -49,6 +49,7 @@ export function DashboardLayout() {
 
   const handleLogout = () => {
     localStorage.removeItem("auth");
+    localStorage.removeItem("authToken");
     clearCurrentUser();
     navigate("/login");
   };

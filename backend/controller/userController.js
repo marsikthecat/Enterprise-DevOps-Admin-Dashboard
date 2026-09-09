@@ -16,12 +16,14 @@ export async function createUser(request, reply) {
 
 export async function signup(request, reply) {
     const user = await service.signup(request.body);
-    reply.code(201).send(user);
+    const token = request.server.jwt.sign({ sub: user.id, email: user.email, role: user.role?.name });
+    reply.code(201).send({ user, token });
 }
 
 export async function login(request, reply) {
     const user = await service.loginUser(request.body);
-    reply.send(user);
+    const token = request.server.jwt.sign({ sub: user.id, email: user.email, role: user.role?.name });
+    reply.send({ user, token });
 }
 
 export async function updateUser(request, reply) {

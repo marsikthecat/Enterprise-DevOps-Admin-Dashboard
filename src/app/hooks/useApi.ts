@@ -1,21 +1,28 @@
 import type { Alert, AuditLogEntry, Container, FileUpload, Permission, Process, Role, StorageRegion, User, Vulnerability } from "../types";
 
 type RequestOptions = Omit<RequestInit, "body"> & { body?: unknown };
+export type AuthResponse = { user: User; token: string };
 
 const API_BASE_URL = "http://localhost:3000";
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { body, headers, ...requestOptions } = options;
+  const token = localStorage.getItem("authToken");
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...requestOptions,
     headers: {
       ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("auth");
+    }
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error || `API request failed: ${response.status}`);
   }
@@ -50,11 +57,11 @@ export const api = {
   getServerProcesses: (serverId: string) => request<Process[]>(`/servers/${serverId}/processes`),
 
   getUsers: () => request<User[]>("/users"),
-  signup: (payload: { name: string; email: string; password: string }) => request<User>("/auth/signup", {
+  signup: (payload: { name: string; email: string; password: string }) => request<AuthResponse>("/auth/signup", {
     method: "POST",
     body: payload,
   }),
-  login: (payload: { email: string; password: string }) => request<User>("/auth/login", {
+  login: (payload: { email: string; password: string }) => request<AuthResponse>("/auth/login", {
     method: "POST",
     body: payload,
   }),

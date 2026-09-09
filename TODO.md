@@ -1,15 +1,15 @@
 ## Ideas/to be considered
 - Improve Design in Security.tsx because there is much empty space in the entries for security alerts
-- Enhance network topology (e.g. live infos, tooltips, better schematic visualisation)
-- Advanced auth with library
 - Configured Roles are not connected to the actual permissions
 
 ## Open
 - Feat: Add list of env variables in container
 
 ## In Progress
+- Feat: Improve design of network topology with more data
 
 ## Done
+- Feat: Implement jwt auth
 - Feat: When clicking on "forgot password" in sign-in, "HA HA" meme from simpsons appears
 - Feat: Clicking on Dashboard-Cards redirection
 - Bug: Changing role of account does not change anything

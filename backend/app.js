@@ -1,5 +1,6 @@
 import Fastify from 'fastify'
 import fastifyCors from '@fastify/cors';
+import fastifyJwt from '@fastify/jwt';
 import * as serverController from "./controller/serverController.js";
 import * as processController from "./controller/processController.js";
 import * as userController from "./controller/userController.js";
@@ -21,6 +22,29 @@ await app.register(fastifyCors, {
   origin: /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/,
   methods: ["GET", "HEAD", "POST", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
+})
+
+const jwtSecret = process.env.JWT_SECRET || (
+  process.env.NODE_ENV === "production" ? null : "development-only-change-me"
+);
+
+if (!jwtSecret) {
+  throw new Error("JWT_SECRET must be configured in production");
+}
+
+await app.register(fastifyJwt, { secret: jwtSecret })
+
+app.addHook("onRequest", async (request, reply) => {
+  const path = request.url.split("?")[0];
+  const isPublic = request.method === "OPTIONS" || path === "/auth/login" || path === "/auth/signup";
+
+  if (isPublic) return;
+
+  try {
+    await request.jwtVerify();
+  } catch {
+    return reply.status(401).send({ error: "Authentication required" });
+  }
 })
 
 app.setErrorHandler((error, request, reply) => {
@@ -65,7 +89,7 @@ app.get("/pipelines", dashboardController.getPipelines);
 app.get("/auditLogs", dashboardController.getAuditLogs);
 app.post("/auditLogs", dashboardController.addAuditLog);
 
-const PORT = 3000;
+const PORT = Number(process.env.PORT || 3000);
 
 app.listen({ port: PORT }, function (err, address) {
   if (err) {
