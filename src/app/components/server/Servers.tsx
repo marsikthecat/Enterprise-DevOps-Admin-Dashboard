@@ -5,6 +5,7 @@ import { DeployServerDialog } from "./dialogs/DeployServerDialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../common/ui/tooltip";
 import { useProcessStore } from "../../states/processCpuState";
 import { useApi } from "../../hooks/useApi";
+import { toast } from "sonner";
 
 export interface ServerInfo {
   id: string;
@@ -35,7 +36,7 @@ export function Servers() {
       const data = await api.getServers();
       setServerList(data);
     } catch (error) {
-      console.error("Error fetching servers:", error);
+      toast.error("Failed to fetch server data");
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +74,7 @@ export function Servers() {
       const newServer = await api.createServer(serverData as Record<string, unknown>);
       setServerList((prev) => [...prev, newServer]);
     } catch (error) {
-      console.error("Error deploying server:", error);
+      toast.error("Error deploying server");
     }
   };
 

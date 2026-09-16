@@ -31,7 +31,6 @@ export function WorldMap(storageRegions: StorageRegion[]) {
 
   const hoveredData = storageRegions.find((r) => r.region === hovered);
 
-
   const handleMarkerEnter = useCallback(
     (region: string, e: React.MouseEvent) => {
       setHovered(region);

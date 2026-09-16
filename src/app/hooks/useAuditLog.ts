@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { useApi } from "./useApi";
 import type { AuditLogEntry } from "../types";
+import { toast} from "sonner";
 
 export function useAuditLog() {
   const api = useApi();
@@ -15,7 +16,7 @@ export function useAuditLog() {
       setAuditLogs(Array.isArray(data) ? data : []);
       return data;
     } catch (error) {
-      console.error("Failed to load audit logs:", error);
+      toast.error("Failed to load audit logs");
       setAuditLogs([]);
       return [];
     } finally {
@@ -29,7 +30,7 @@ export function useAuditLog() {
       setAuditLogs((prev) => [entry, ...prev]);
       return entry;
     } catch (error) {
-      console.error("Failed to add audit log:", error);
+      toast.error("Failed to add audit log");
       throw error;
     }
   }, [api]);

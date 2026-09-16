@@ -7,6 +7,7 @@ import { DeployContainerDialog } from "./dialogs/DeployContainerDialog";
 import { useProcessStore } from "../../states/processCpuState";
 import { KillContainerDialog } from "./dialogs/KillContainerDialog";
 import { useApi } from "../../hooks/useApi";
+import { toast } from "sonner";
 
 const pipelines = [
   {
@@ -78,7 +79,7 @@ export function ServerDetail() {
         ));
         applyProcessUpdates(result.processes);
       } catch (error) {
-        console.error(`Failed to ${action.action} container`, error);
+        toast.error(`Failed to ${action.action} container`);
         await fetchContainer();
       }
     }
@@ -112,7 +113,7 @@ export function ServerDetail() {
       const containers = await api.getContainers(id!);
       setContainerList(containers); 
     } catch (error) {
-      console.error("Failed to fetch containers", error);
+      toast.error("Failed to fetch containers");
     }
   }
   useEffect(() => {
@@ -124,7 +125,7 @@ export function ServerDetail() {
       const newContainer = await api.deployContainer(id!, containerData as Record<string, unknown>);
       setContainerList((prev) => [...prev, newContainer]);
     } catch (error) {
-      console.error("Error deploying container:", error);
+      toast.error("Error deploying container");
     }
   }
 

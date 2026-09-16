@@ -18,6 +18,7 @@ import {
   TooltipTrigger,
 } from "../common/ui/tooltip";
 import { useCurrentUser } from "../hooks/useCurrentUser";
+import { Toaster } from "../common/ui/sonner";
 
 const latestNews = [
   "Production API latency is back within normal range.",
@@ -157,6 +158,7 @@ export function DashboardLayout() {
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
+        <Toaster position="bottom-right" richColors />
         <Outlet />
       </main>
     </div>

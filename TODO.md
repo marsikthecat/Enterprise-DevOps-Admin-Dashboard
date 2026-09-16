@@ -1,14 +1,13 @@
 ## Ideas/to be considered
-- Improve Design in Security.tsx: too much empty space in security alerts entries
-- Configured Roles are not connected to the actual permissions
 
 ## Open
-- Feat: Add list of env variables in container
+- Feat: Validatation in backend with zod
 
 ## In Progress
-
+- Feat: Enfore permissions configured in rolemanagement
 
 ## Done
+- Feat: Error management
 - Feat: Improve design of network topology with more data
 - Feat: Implement jwt auth
 - Feat: When clicking on "forgot password" in sign-in, "HA HA" meme from simpsons appears

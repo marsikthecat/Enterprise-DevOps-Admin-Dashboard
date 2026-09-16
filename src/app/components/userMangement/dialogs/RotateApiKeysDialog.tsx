@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { X, Key, AlertTriangle, Check, ShieldCheck } from "lucide-react";
 import { useAuditLog } from "../../../hooks/useAuditLog";
 import { useCurrentUser } from "../../../hooks/useCurrentUser";
+import { toast} from "sonner";
 
 type Phase = "confirm" | "rotate";
 
@@ -234,7 +235,7 @@ export function RotateAPIKeysDialog({ isOpen, onClose }: RotateAPIKeysDialogProp
               author: currentUserEmail || "unknown",
             });
           } catch (error) {
-            console.error("Failed to save key rotation audit log:", error);
+            toast.error("Failed to save key rotation to audit log");
           }
         }, 550);
       }

@@ -1,10 +1,11 @@
-import { Shield, AlertTriangle, Lock, Activity } from "lucide-react";
+import { AlertTriangle} from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useEffect, useState } from "react";
 import IncidentPaywallModal from "./dialogs/PaymentWall";
 import { useApi } from "../../hooks/useApi";
 import type { Alert, Vulnerability } from "../../types";
 import { FirewallSection } from "./firewall/FirewallSection";
+import { toast } from "sonner";
 
 const securityEvents = [
   { time: "00:00", events: 12 },
@@ -32,13 +33,11 @@ export function Security() {
         setRecentAlerts(alertsResponse);
         setVulnerabilities(vulnerabilitiesResponse);
       } catch (error) {
-        console.error("Failed to fetch security data:", error);
+        toast.error("Failed to fetch security data");
       }
     };
     fetchSecurityData();
   }, [api]);
-
-  const criticalAlerts = recentAlerts.filter((alert) => alert.severity === "critical").length;
 
   return (
     <div className="p-6 space-y-6">

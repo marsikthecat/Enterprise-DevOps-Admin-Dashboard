@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { X, Shield, Plus, Check } from "lucide-react";
 import type { Permission, Role, User } from "../../../types";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../../common/ui/tooltip";
+import { toast} from "sonner";
 
 interface RoleManagementDialogProps {
   isOpen: boolean;
@@ -89,7 +90,7 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, use
       await onUpdateRole(role);
       onClose();
     } catch (error) {
-      console.error("Failed to update role permissions:", error);
+      toast.error("Failed to update role permissions");
     } finally {
       setIsSaving(false);
     }
@@ -108,7 +109,7 @@ export function RoleManagementDialog({ isOpen, onClose, roles: initialRoles, use
       setIsAddingRole(false);
       setEditingRole(newRole.id);
     } catch (error) {
-      console.error("Failed to create role:", error);
+      toast.error("Failed to create role");
     }
   };
 

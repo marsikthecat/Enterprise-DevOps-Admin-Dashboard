@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { api } from "../hooks/useApi";
 import type { Process } from "../types";
-
+import { toast } from "sonner";
 
 interface ProcessStore {
   processes: Process[];
@@ -18,7 +18,7 @@ export const useProcessStore = create<ProcessStore>((set, get) => ({
       const data = await api.getProcesses();
       set({ processes: data });
     } catch (err) {
-      console.error("fetch error", err);
+      toast.error("failed to fetch processes");
     }
   },
 

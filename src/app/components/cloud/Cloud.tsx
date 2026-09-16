@@ -9,6 +9,7 @@ import { UploadBackupDialog } from "./DeployToCloudDialog";
 import { WorldMap } from "./parts/WorldMap";
 import { useApi } from "../../hooks/useApi";
 import type { FileUpload, StorageRegion } from "../../types";
+import { toast } from "sonner";
 
 export function Cloud() {
   const api = useApi();
@@ -29,7 +30,7 @@ export function Cloud() {
         setStorageRegion(regionsResponse);
         setRecentUploads(uploadsResponse);
       } catch (error) {
-        console.error("Failed to fetch cloud data:", error);
+        toast.error("Failed to fetch cloud data. Please try again later.");
       }
     };
 

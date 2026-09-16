@@ -12,7 +12,7 @@ import { useApi } from "../../hooks/useApi";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../common/ui/tooltip";
 import type { Role, User } from "../../types";
-
+import { toast } from "sonner";
 
 const roleColors = {
   Admin: "bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/30",
@@ -69,21 +69,23 @@ export function Users() {
       setRoles((currentRoles) => currentRoles.filter((role) => role.id !== roleToDelete.id));
       setRoleToDelete(null);
     } catch (error) {
-      console.error("Failed to delete role:", error);
+      toast.error("Failed to delete role");
     }
   };
 
   const handleCreateRole = async (name: string): Promise<Role> => {
-    if (!isAdmin) throw new Error("You need to be an admin");
-
+    if (!isAdmin) {
+      toast.error("You need to be an admin");
+    }
     const createdRole = await api.createRole(name);
     setRoles((currentRoles) => [...currentRoles, createdRole]);
     return createdRole;
   };
 
   const handleUpdateRole = async (role: Role): Promise<Role> => {
-    if (!isAdmin) throw new Error("You need to be an admin");
-
+    if (!isAdmin) {
+      toast.error("You need to be an admin");
+    }
     const updatedRole = await api.updateRole(role.id, role.permissions.map((permission) => ({
       key: permission.key ?? permission.id,
       name: permission.name,
@@ -133,7 +135,7 @@ export function Users() {
         });
       }
     } catch (error) {
-      console.error("Failed to update user:", error);
+      toast.error("Failed to update user");
     }
   };
 
@@ -148,7 +150,7 @@ export function Users() {
         setUsers(usersResponse);
         setRoles(rolesResponse);
       } catch (error) {
-        console.error("Failed to fetch users:", error);
+        toast.error("Failed to fetch users");
       } finally {
         setLoading(false);
       }
@@ -162,7 +164,7 @@ export function Users() {
       await api.deleteUser(userId);
       setUsers((currentUsers) => currentUsers.filter((user) => user.id !== userId));
     } catch (error) {
-      console.error("Failed to delete user:", error);
+      toast.error("Failed to delete user");
     }
   };
 

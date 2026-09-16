@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Download, FileText, X, Copy, Check } from "lucide-react";
 import { useAuditLog } from "../../../hooks/useAuditLog";
+import { toast } from "sonner";
 
 interface ExportAuditLogsDialogProps {
   isOpen: boolean;
@@ -31,7 +32,7 @@ export function ExportAuditLogsDialog({ isOpen, onClose }: ExportAuditLogsDialog
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1400);
     } catch (error) {
-      console.error("Copy failed:", error);
+      toast.error("Copy failed");
     }
   };
 

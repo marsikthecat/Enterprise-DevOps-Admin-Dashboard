@@ -19,7 +19,6 @@ export function AddUserDialog({ isOpen, onClose, onSuccess }: AddUserDialogProps
   if (!isOpen) return null;
 
   const handleAdd = () => {
-    console.log("Adding user:", userConfig);
     onSuccess(userConfig.email);
     setUserConfig({ name: "", email: "", role: "Developer" });
     onClose();
