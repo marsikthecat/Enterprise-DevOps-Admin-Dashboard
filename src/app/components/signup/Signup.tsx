@@ -150,7 +150,12 @@ export function Signup() {
       setSuccess(true);
       setTimeout(() => {
         localStorage.setItem("auth", "true");
-        setCurrentUser({ name, email, role: user.role?.name });
+        setCurrentUser({
+          name,
+          email,
+          role: user.role?.name,
+          permissions: user.role?.permissions?.map((permission) => permission.key ?? permission.id) ?? [],
+        });
         navigate("/");
       }, 1400);
     } catch (err) {

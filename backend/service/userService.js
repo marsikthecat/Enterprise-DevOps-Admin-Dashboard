@@ -11,7 +11,7 @@ function sanitizeUser(user) {
 
 export async function getUsers() {
     const users = await prisma.user.findMany({
-      include: { role: true },
+      include: { role: { include: { permissions: true } } },
       orderBy: { createdAt: 'desc' }
     });
     return users.map(sanitizeUser);
@@ -20,7 +20,7 @@ export async function getUsers() {
 export async function getUser(userId) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      include: { role: true }
+      include: { role: { include: { permissions: true } } }
     });
     if (!user) {
       throw new AppError(404, "User not found");
@@ -67,7 +67,7 @@ export async function createUser(body) {
         sessions: 0,
         avatar: avatar || normalizedName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
       },
-      include: { role: true }
+      include: { role: { include: { permissions: true } } }
     });
     return sanitizeUser(user);
 }
@@ -89,7 +89,7 @@ export async function loginUser(body) {
         email: normalizedEmail,
         password: normalizedPassword
       },
-      include: { role: true }
+      include: { role: { include: { permissions: true } } }
     });
 
     if (!user) {
@@ -102,7 +102,7 @@ export async function loginUser(body) {
         lastLogin: new Date(),
         sessions: user.sessions + 1,
       },
-      include: { role: true }
+      include: { role: { include: { permissions: true } } }
     });
 
     return sanitizeUser(updatedUser);
@@ -124,7 +124,7 @@ export async function updateUser(userId, body) {
         ...(sessions !== undefined && { sessions }),
         lastLogin: new Date()
       },
-      include: { role: true }
+      include: { role: { include: { permissions: true } } }
     });
     return sanitizeUser(user);
 }

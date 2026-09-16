@@ -6,6 +6,7 @@ import { useApi } from "../../hooks/useApi";
 import type { Alert, Vulnerability } from "../../types";
 import { FirewallSection } from "./firewall/FirewallSection";
 import { toast } from "sonner";
+import { PermissionButton } from "../PermissionButton";
 
 const securityEvents = [
   { time: "00:00", events: 12 },
@@ -93,9 +94,12 @@ export function Security() {
                     <span className="text-[#38BDF8]">{alert.status}</span>
                   </div>
                 </div>
-                <button className="text-sm text-[#38BDF8] hover:text-[#0EA5E9] px-3 py-1" onClick={() => setPaywallOpen(true)}>
+                <PermissionButton
+                  permission="security.write"
+                  className="text-sm text-[#38BDF8] hover:text-[#0EA5E9] px-3 py-1" 
+                  onClick={() => setPaywallOpen(true)}>
                   Investigate
-                </button>
+                </PermissionButton>
               </div>
             </div>
           ))}

@@ -128,6 +128,7 @@ export function Login() {
         name: user.name || "User",
         email: user.email || email,
         role: user.role?.name,
+        permissions: user.role?.permissions?.map((permission) => permission.key ?? permission.id) ?? [],
       });
       navigate("/");
     } catch (err) {

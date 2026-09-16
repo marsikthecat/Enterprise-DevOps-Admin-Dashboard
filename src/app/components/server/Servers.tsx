@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../../common/ui/tooltip
 import { useProcessStore } from "../../states/processCpuState";
 import { useApi } from "../../hooks/useApi";
 import { toast } from "sonner";
+import { PermissionButton } from "../PermissionButton";
 
 export interface ServerInfo {
   id: string;
@@ -85,13 +86,14 @@ export function Servers() {
           <h1 className="text-3xl font-semibold text-white mb-1">Server Infrastructure</h1>
           <p className="text-[#9CA3AF]">Manage and monitor all server instances</p>
         </div>
-        <button
+        <PermissionButton
+          permission="servers.deploy"
           onClick={() => setIsDeployDialogOpen(true)}
           className="flex items-center gap-2 px-4 py-2 bg-[#38BDF8] hover:bg-[#0EA5E9] text-white rounded-lg transition-colors"
         >
           <Plus className="w-4 h-4" />
           Deploy New Server
-        </button>
+        </PermissionButton>
       </div>
 
       {isLoading && serverList.length === 0 ? (

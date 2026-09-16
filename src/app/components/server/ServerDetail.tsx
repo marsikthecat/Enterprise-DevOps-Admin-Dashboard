@@ -8,6 +8,7 @@ import { useProcessStore } from "../../states/processCpuState";
 import { KillContainerDialog } from "./dialogs/KillContainerDialog";
 import { useApi } from "../../hooks/useApi";
 import { toast } from "sonner";
+import { PermissionButton } from "../PermissionButton";
 
 const pipelines = [
   {
@@ -151,18 +152,28 @@ export function ServerDetail() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button className="px-4 py-2 bg-[#1f2937] hover:bg-[#1a2332] text-white rounded-lg transition-colors flex items-center gap-2">
+            <PermissionButton 
+              className="px-4 py-2 bg-[#1f2937] hover:bg-[#1a2332] text-white rounded-lg transition-colors flex items-center gap-2"
+              permission="servers.write"
+            >
               <Terminal className="w-4 h-4" />
               SSH Console
-            </button>
-            <button className="px-4 py-2 bg-[#1f2937] hover:bg-[#1a2332] text-white rounded-lg transition-colors flex items-center gap-2">
+            </PermissionButton>
+            <PermissionButton 
+              className="px-4 py-2 bg-[#1f2937] hover:bg-[#1a2332] text-white rounded-lg transition-colors flex items-center gap-2"
+              permission="servers.write"
+            >
               <RefreshCw className="w-4 h-4" />
               Restart
-            </button>
-            <button onClick={() => setOpen(true)} className="px-4 py-2 bg-[#1f2937] hover:bg-[#1a2332] text-white rounded-lg transition-colors flex items-center gap-2">
+            </PermissionButton>
+            <PermissionButton 
+              onClick={() => setOpen(true)} 
+              className="px-4 py-2 bg-[#1f2937] hover:bg-[#1a2332] text-white rounded-lg transition-colors flex items-center gap-2"
+              permission="servers.write"
+              >  
               <Power className="w-4 h-4"  />
               Shutdown
-            </button>
+            </PermissionButton>
           </div>
         </div>
       </div>
@@ -174,12 +185,13 @@ export function ServerDetail() {
             <Package className="w-5 h-5 text-[#38BDF8]" />
             Docker Containers
           </h3>
-          <button
+          <PermissionButton
+            permission="containers.deploy"
             onClick={() => setIsDeployContainerDialogOpen(true)}
             className="text-sm text-[#38BDF8] hover:text-[#0EA5E9] transition-colors"
           >
             + Deploy Container
-          </button>
+          </PermissionButton>
         </div>
         <div className="grid grid-cols-2 gap-3">
           {containerList.map((container) => (
@@ -204,27 +216,30 @@ export function ServerDetail() {
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-1">
-                <button
+                <PermissionButton 
                   onClick={() => handleContainerAction("stop", container.id)}
                   className="py-1.5 bg-[#1f2937] hover:bg-[#1a2332] rounded text-xs text-white transition-colors flex items-center justify-center gap-1"
+                  permission="containers.write"
                 >
                   <Square className="w-3 h-3" />
                   Stop
-                </button>
-                <button
+                </PermissionButton>
+                <PermissionButton
                   onClick={() => handleContainerAction("restart", container.id)}
                   className="py-1.5 bg-[#1f2937] hover:bg-[#1a2332] rounded text-xs text-white transition-colors flex items-center justify-center gap-1"
+                  permission="containers.write"
                 >
                   <RefreshCw className="w-3 h-3" />
                   Restart
-                </button>
-                <button
+                </PermissionButton>
+                <PermissionButton
+                  permission="containers.write"
                   onClick={() => handleContainerAction("kill", container.id)}
                   className="py-1.5 bg-[#EF4444]/10 hover:bg-[#EF4444]/20 border border-[#EF4444]/30 rounded text-xs text-[#EF4444] transition-colors flex items-center justify-center gap-1"
                 >
                   <XCircle className="w-3 h-3" />
                   Kill
-                </button>
+                </PermissionButton>
               </div>
             </div>
           ))}

@@ -10,6 +10,7 @@ import { WorldMap } from "./parts/WorldMap";
 import { useApi } from "../../hooks/useApi";
 import type { FileUpload, StorageRegion } from "../../types";
 import { toast } from "sonner";
+import { PermissionButton } from "../PermissionButton";
 
 export function Cloud() {
   const api = useApi();
@@ -49,13 +50,15 @@ export function Cloud() {
           <h1 className="text-3xl font-semibold text-white mb-1">Cloud Storage</h1>
           <p className="text-[#9CA3AF]">Manage distributed storage and backups</p>
         </div>
-        <button
+
+        <PermissionButton
+          permission="cloud.write"
           onClick={() => setIsUploadBackupDialogOpen(true)}
           className="flex items-center gap-2 px-4 py-2 bg-[#38BDF8] hover:bg-[#0EA5E9] text-white rounded-lg transition-colors"
         >
           <Upload className="w-4 h-4" />
           Upload Backup
-        </button>
+        </PermissionButton>
       </div>
 
       {/* Stats */}

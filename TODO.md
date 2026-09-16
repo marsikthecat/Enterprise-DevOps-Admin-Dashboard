@@ -1,12 +1,12 @@
 ## Ideas/to be considered
 
 ## Open
-- Feat: Validatation in backend with zod
 
 ## In Progress
-- Feat: Enfore permissions configured in rolemanagement
+- Feat: Validatation in backend with zod
 
 ## Done
+- Feat: Enforce permissions configured in rolemanagement
 - Feat: Error management
 - Feat: Improve design of network topology with more data
 - Feat: Implement jwt auth

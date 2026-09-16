@@ -132,6 +132,7 @@ export function Users() {
           name: updatedUser.name,
           email: updatedUser.email,
           role: updatedUser.role?.name,
+          permissions: updatedUser.role?.permissions?.map((permission) => permission.key ?? permission.id) ?? [],
         });
       }
     } catch (error) {
@@ -146,11 +147,10 @@ export function Users() {
           api.getUsers(),
           api.getRoles(),
         ]);
-
         setUsers(usersResponse);
         setRoles(rolesResponse);
       } catch (error) {
-        toast.error("Failed to fetch users");
+        toast.error("Failed to fetch users and roles");
       } finally {
         setLoading(false);
       }

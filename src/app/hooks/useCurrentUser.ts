@@ -4,6 +4,7 @@ export interface CurrentUser {
   name: string;
   email: string;
   role?: string;
+  permissions?: string[];
 }
 
 function readStoredUser(): CurrentUser {
@@ -16,6 +17,7 @@ function readStoredUser(): CurrentUser {
       name: parsedUser?.name || "User",
       email: parsedUser?.email || "",
       role: parsedUser?.role,
+      permissions: parsedUser?.permissions ?? [],
     };
   } catch {
     return { name: "User", email: "", role: undefined };
