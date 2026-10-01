@@ -1,6 +1,7 @@
-import { randomUUID } from "node:crypto";
 import { PrismaClient } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
 import { AppError } from "../app.js";
+import type { DeployContainer, Server } from '../zod.js';
 
 const prisma = new PrismaClient();
 
@@ -11,11 +12,8 @@ export async function getServers() {
     return servers;
 }
 
-export async function deployServer(body) {
-   const { id, type, cpu, memory, storage, region } = body;
-    if (!id || !type) {
-      throw new AppError(400, 'ID and type are required');
-    }
+export async function deployServer(newServer: Server) {
+   const { id, type, cpu, memory, storage, region } = newServer;
     const server = await prisma.server.create({
       data: {
         id,
@@ -33,25 +31,25 @@ export async function deployServer(body) {
     return server;
 }
 
-export async function getContainerOfServer(serverId) {
+export async function getContainerOfServer(serverId: string) {
     const containers = await prisma.container.findMany({
       where: { serverId }
     });
     return containers;
 }
 
-function getImageRepository(image) {
-    return image.split('/').pop().split(':')[0].toLowerCase();
+function getImageRepository(image: string) {
+    return image.split('/').pop()!.split(':')[0].toLowerCase();
 }
 
-function processBelongsToImage(processName, image) {
+function processBelongsToImage(processName: string, image: string) {
     const name = processName.toLowerCase();
     const repository = getImageRepository(image);
     const processPrefixes = repository === 'mongo' ? ['mongo', 'mongod'] : [repository];
     return processPrefixes.some((prefix) => name === prefix || name.startsWith(`${prefix}:`) || name.startsWith(`${prefix}-`));
 }
 
-export async function changeContainerState(serverId, containerId, action) {
+export async function changeContainerState(serverId: string, containerId: string, action: string) {
     if (action !== 'stop' && action !== 'restart') {
       throw new AppError(400, 'Container action must be stop or restart');
     }
@@ -60,7 +58,6 @@ export async function changeContainerState(serverId, containerId, action) {
       const container = await transaction.container.findFirst({
         where: { id: containerId, serverId }
       });
-
       if (!container) {
         throw new AppError(404, 'Container not found');
       }
@@ -85,7 +82,6 @@ export async function changeContainerState(serverId, containerId, action) {
         });
         updatedProcesses.push(updatedProcess);
       }
-
       return {
         container: { ...container, status: isStopped ? 'stopped' : 'running' },
         processes: updatedProcesses
@@ -93,16 +89,19 @@ export async function changeContainerState(serverId, containerId, action) {
     });
 }
 
-export async function deployContainerToServer(serverId, body) {
-    const { container } = body;
-    const server = await prisma.server.update({
-      where: { serverId },
-      data: { containers: { push: container } }
+export async function deployContainerToServer(serverId: string, container: DeployContainer) {
+    return prisma.container.create({
+      data: {
+        id: uuidv4(),
+        image: container.image,
+        status: container.status,
+        ports: container.ports,
+        serverId
+      }
     });
-    return container;
 }
 
-export async function getProcessesOfServer(serverId) {
+export async function getProcessesOfServer(serverId: string) {
     const processes = await prisma.process.findMany({
       where: { serverId }
     });

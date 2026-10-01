@@ -1,9 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import { AppError } from '../app.js';
+import type { LoginUser, UpdatedUser, User } from '../zod.js';
 
 const prisma = new PrismaClient();
 
-function sanitizeUser(user) {
+function sanitizeUser<T extends { password: string }>(user: T): Omit<T, "password">;
+function sanitizeUser<T extends { password: string }>(user: T | null) {
     if (!user) return null;
     const { password, ...rest } = user;
     return rest;
@@ -14,10 +16,10 @@ export async function getUsers() {
       include: { role: { include: { permissions: true } } },
       orderBy: { createdAt: 'desc' }
     });
-    return users.map(sanitizeUser);
+    return users.map((user) => sanitizeUser(user));
 }
 
-export async function getUser(userId) {
+export async function getUser(userId: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: { role: { include: { permissions: true } } }
@@ -28,15 +30,11 @@ export async function getUser(userId) {
     return sanitizeUser(user);
 }
 
-export async function createUser(body) {
-    const { name, email, password, role, status, avatar } = body;
-    const normalizedName = String(name ?? '').trim();
-    const normalizedEmail = String(email ?? '').trim().toLowerCase();
-    const normalizedPassword = String(password ?? '').trim();
-
-    if (!normalizedName || !normalizedEmail || !normalizedPassword) {
-        throw new AppError(400, "Name, email and password are required");
-    }
+export async function createUser(newUser: User) {
+    const { name, email, password, role, status, avatar } = newUser;
+    const normalizedName = name.trim();
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPassword = password.trim();
 
     const existingUserWithEmail = await prisma.user.findFirst({
       where: { email: normalizedEmail }
@@ -72,17 +70,13 @@ export async function createUser(body) {
     return sanitizeUser(user);
 }
 
-export async function signup(body) {
+export async function signup(body: User) {
     return createUser(body);
 }
 
-export async function loginUser(body) {
-    const normalizedEmail = String(body?.email ?? '').trim().toLowerCase();
-    const normalizedPassword = String(body?.password ?? '').trim();
-
-    if (!normalizedEmail || !normalizedPassword) {
-      throw new AppError(400, "Email and password are required");
-    }
+export async function loginUser(loginUser: LoginUser) {
+    const normalizedEmail = loginUser.email.trim().toLowerCase();
+    const normalizedPassword = loginUser.password.trim();
 
     const user = await prisma.user.findFirst({
       where: {
@@ -108,17 +102,17 @@ export async function loginUser(body) {
     return sanitizeUser(updatedUser);
 }
 
-export async function updateUser(userId, body) {
-    const { name, email, password, role, status, sessions } = body;
+export async function updateUser(userId: string, updatedUser: UpdatedUser) {
+  const { name, email, password, role, status, sessions } = updatedUser;
 
-    const roleRecord = typeof role === 'string' ? await prisma.role.findUnique({ where: { name: role } }) : null;
+    const roleRecord =  await prisma.role.findUnique({ where: { name: role }});
 
     const user = await prisma.user.update({
       where: { id: userId},
       data: {
         ...(name && { name }),
         ...(email && { email }),
-        ...(password && { password: String(password).trim() }),
+        ...(password && { password: password.trim() }),
         ...(roleRecord ? { roleId: roleRecord.id } : {}),
         ...(status && { status }),
         ...(sessions !== undefined && { sessions }),
@@ -129,7 +123,7 @@ export async function updateUser(userId, body) {
     return sanitizeUser(user);
 }
 
-export async function deleteUser(userId) {
+export async function deleteUser(userId: string) {
     await prisma.user.delete({
       where: { id: userId }
     });

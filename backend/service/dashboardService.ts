@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
+import type { AuditLog } from "../zod.js";
 
 const prisma = new PrismaClient();
 
@@ -40,7 +41,8 @@ export async function getAuditLogs() {
   });
 }
 
-export async function addAuditLog({ action, author }) {
+export async function addAuditLog(newAuditLog: AuditLog) {
+  const { action, author } = newAuditLog;
   const timeStamp = new Date().toISOString();
   const id = uuidv4();
   const auditLog = await prisma.auditLogEntry.create({

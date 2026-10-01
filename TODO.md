@@ -3,9 +3,9 @@
 ## Open
 
 ## In Progress
-- Feat: Validatation in backend with zod
 
 ## Done
+- Feat: Validatation in backend with zod
 - Feat: Enforce permissions configured in rolemanagement
 - Feat: Error management
 - Feat: Improve design of network topology with more data

@@ -8,9 +8,12 @@ import * as roleController from "./controller/roleController.js";
 import * as dashboardController from "./controller/dashboardController.js";
 
 export class AppError extends Error {
+    readonly statusCode: number;
+
     constructor(statusCode = 500, message = "Internal Server Error") {
-        super(message);
+      super(message);
       this.statusCode = statusCode;
+      this.name = "AppError";
     }
 }
 
